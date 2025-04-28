@@ -4,8 +4,8 @@
 <div align="center">
 
 
-_The intelligent (edge and LLM) proxy server for agentic applications._<br><br>
-Move faster by letting Arch handle the **pesky** heavy lifting in building agents: fast input clarification, agent routing, seamless integration of prompts with tools for common tasks, and unified access and observability of LLMs.
+_The AI-native proxy server for agentic applications._<br><br>
+Arch handles the **pesky**, low-level details like routing user prompts to the right agents or specialized Model Context Protocol (MCP) tools, providing unified access and observability to large language models (LLMs), and quickly clarifying vague user inputs. With Arch, you build faster by focusing on the high-level logic of agents.
 
 [Quickstart](#Quickstart) •
 [Demos](#Demos) •
