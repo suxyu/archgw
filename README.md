@@ -95,11 +95,12 @@ Create `arch_config.yaml` file with following content,
 ```yaml
 version: v0.1
 
-listener:
-  address: 0.0.0.0
-  port: 10000
-  message_format: huggingface
-  connect_timeout: 0.005s
+listeners:
+  ingress_traffic:
+    address: 0.0.0.0
+    port: 10000
+    message_format: openai
+    timeout: 30s
 
 llm_providers:
   - name: gpt-4o
@@ -196,11 +197,12 @@ Create `arch_config.yaml` file with following content:
 ```yaml
 version: v0.1
 
-listener:
-  address: 0.0.0.0
-  port: 10000
-  message_format: huggingface
-  connect_timeout: 0.005s
+listeners:
+  egress_traffic:
+    address: 0.0.0.0
+    port: 12000
+    message_format: openai
+    timeout: 30s
 
 llm_providers:
   - name: gpt-4o
