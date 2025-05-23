@@ -1,14 +1,13 @@
 use std::sync::Arc;
 
 use common::{
-    api::open_ai::{ChatCompletionsResponse, Message},
+    api::open_ai::{ChatCompletionsResponse, ContentType, Message},
     configuration::LlmProvider,
     consts::ARCH_PROVIDER_HINT_HEADER,
-    utils::shorten_string,
 };
 use hyper::header;
 use thiserror::Error;
-use tracing::{info, warn};
+use tracing::{debug, info, warn};
 
 use super::router_model::RouterModel;
 
@@ -59,9 +58,9 @@ impl RouterService {
             .collect::<Vec<String>>()
             .join("\n");
 
-        info!(
+        debug!(
             "llm_providers from config with usage: {}...",
-            shorten_string(&llm_providers_with_usage_yaml.replace("\n", "\\n"))
+            llm_providers_with_usage_yaml.replace("\n", "\\n")
         );
 
         let router_model = Arc::new(super::router_model_v1::RouterModelV1::new(
@@ -83,7 +82,6 @@ impl RouterService {
         messages: &[Message],
         trace_parent: Option<String>,
     ) -> Result<Option<String>> {
-
         if !self.llm_usage_defined {
             return Ok(None);
         }
@@ -91,8 +89,14 @@ impl RouterService {
         let router_request = self.router_model.generate_request(messages);
 
         info!(
-            "router_request: {}",
-            shorten_string(&serde_json::to_string(&router_request).unwrap()),
+            "sending request to arch-router model: {}, endpoint: {}",
+            self.router_model.get_model_name(),
+            self.router_url
+        );
+
+        debug!(
+            "arch request body: {}",
+            &serde_json::to_string(&router_request).unwrap(),
         );
 
         let mut llm_route_request_headers = header::HeaderMap::new();
@@ -113,6 +117,7 @@ impl RouterService {
             );
         }
 
+        let start_time = std::time::Instant::now();
         let res = self
             .client
             .post(&self.router_url)
@@ -122,6 +127,7 @@ impl RouterService {
             .await?;
 
         let body = res.text().await?;
+        let router_response_time = start_time.elapsed();
 
         let chat_completion_response: ChatCompletionsResponse = match serde_json::from_str(&body) {
             Ok(response) => response,
@@ -138,14 +144,18 @@ impl RouterService {
             }
         };
 
-        let selected_llm = self.router_model.parse_response(
-            chat_completion_response.choices[0]
-                .message
-                .content
-                .as_ref()
-                .unwrap(),
-        )?;
-
-        Ok(selected_llm)
+        if let Some(ContentType::Text(content)) =
+            &chat_completion_response.choices[0].message.content
+        {
+            info!(
+                "router response: {}, response time: {}ms",
+                content.replace("\n", "\\n"),
+                router_response_time.as_millis()
+            );
+            let selected_llm = self.router_model.parse_response(content)?;
+            Ok(selected_llm)
+        } else {
+            Ok(None)
+        }
     }
 }

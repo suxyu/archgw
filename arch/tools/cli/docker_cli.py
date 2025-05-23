@@ -58,7 +58,6 @@ def docker_start_archgw_detached(
 
     volume_mappings = [
         f"{arch_config_file}:/app/arch_config.yaml:ro",
-        # "/Users/adilhafeez/src/intelligent-prompt-gateway/crates/target/wasm32-wasip1/release:/etc/envoy/proxy-wasm-plugins:ro",
     ]
     volume_mappings_args = [
         item for volume in volume_mappings for item in ("-v", volume)

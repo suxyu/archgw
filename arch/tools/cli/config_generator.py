@@ -80,7 +80,17 @@ def validate_and_render_schema():
     llms_with_endpoint = []
 
     updated_llm_providers = []
+    llm_provider_name_set = set()
     for llm_provider in config_yaml["llm_providers"]:
+        if llm_provider.get("name") in llm_provider_name_set:
+            raise Exception(
+                f"Duplicate llm_provider name {llm_provider.get('name')}, please provide unique name for each llm_provider"
+            )
+        if llm_provider.get("name") is None:
+            raise Exception(
+                f"llm_provider name is required, please provide name for llm_provider"
+            )
+        llm_provider_name_set.add(llm_provider.get("name"))
         provider = None
         if llm_provider.get("provider") and llm_provider.get("provider_interface"):
             raise Exception(

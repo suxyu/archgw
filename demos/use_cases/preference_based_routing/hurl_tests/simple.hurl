@@ -12,7 +12,7 @@ Content-Type: application/json
 HTTP 200
 [Asserts]
 header "content-type" == "application/json"
-jsonpath "$.model" matches /^o4-mini/
+jsonpath "$.model" matches /^gpt-4o/
 jsonpath "$.usage" != null
 jsonpath "$.choices[0].message.content" != null
 jsonpath "$.choices[0].message.role" == "assistant"

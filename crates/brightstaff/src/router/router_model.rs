@@ -12,4 +12,5 @@ pub type Result<T> = std::result::Result<T, RoutingModelError>;
 pub trait RouterModel: Send + Sync {
     fn generate_request(&self, messages: &[Message]) -> ChatCompletionsRequest;
     fn parse_response(&self, content: &str) -> Result<Option<String>>;
+    fn get_model_name(&self) -> String;
 }

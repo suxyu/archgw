@@ -2,37 +2,26 @@ use brightstaff::handlers::chat_completions::chat_completions;
 use brightstaff::router::llm_router::RouterService;
 use bytes::Bytes;
 use common::configuration::Configuration;
-use common::utils::shorten_string;
 use http_body_util::{combinators::BoxBody, BodyExt, Empty};
 use hyper::body::Incoming;
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
 use hyper::{Method, Request, Response, StatusCode};
 use hyper_util::rt::TokioIo;
-use opentelemetry::global::BoxedTracer;
 use opentelemetry::trace::FutureExt;
-use opentelemetry::{
-    global,
-    trace::{SpanKind, Tracer},
-    Context,
-};
+use opentelemetry::{global, Context};
 use opentelemetry_http::HeaderExtractor;
 use opentelemetry_sdk::{propagation::TraceContextPropagator, trace::SdkTracerProvider};
 use opentelemetry_stdout::SpanExporter;
-use std::sync::{Arc, OnceLock};
+use std::sync::Arc;
 use std::{env, fs};
 use tokio::net::TcpListener;
-use tracing::info;
+use tracing::{debug, info};
 use tracing_subscriber::EnvFilter;
 
 pub mod router;
 
 const BIND_ADDRESS: &str = "0.0.0.0:9091";
-
-fn get_tracer() -> &'static BoxedTracer {
-    static TRACER: OnceLock<BoxedTracer> = OnceLock::new();
-    TRACER.get_or_init(|| global::tracer("archgw/router"))
-}
 
 // Utility function to extract the context from the incoming request headers
 fn extract_context_from_request(req: &Request<Incoming>) -> Context {
@@ -83,24 +72,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let arch_config = Arc::new(config);
 
-    info!(
+    debug!(
         "arch_config: {:?}",
-        shorten_string(&serde_json::to_string(arch_config.as_ref()).unwrap())
+        &serde_json::to_string(arch_config.as_ref()).unwrap()
     );
 
     let llm_provider_endpoint = env::var("LLM_PROVIDER_ENDPOINT")
         .unwrap_or_else(|_| "http://localhost:12001/v1/chat/completions".to_string());
 
     info!("llm provider endpoint: {}", llm_provider_endpoint);
-    info!("Listening on http://{}", bind_address);
+    info!("listening on http://{}", bind_address);
     let listener = TcpListener::bind(bind_address).await?;
 
-
     // if routing is null then return gpt-4o as model name
-    let model = arch_config.routing.as_ref().map_or_else(
-        || "gpt-4o".to_string(),
-        |routing| routing.model.clone(),
-    );
+    //TODO: fail if routing is null
+    let model = arch_config
+        .routing
+        .as_ref()
+        .map_or_else(|| "gpt-4o".to_string(), |routing| routing.model.clone());
 
     let router_service: Arc<RouterService> = Arc::new(RouterService::new(
         arch_config.llm_providers.clone(),
@@ -119,12 +108,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let service = service_fn(move |req| {
             let router_service = Arc::clone(&router_service);
             let parent_cx = extract_context_from_request(&req);
-            info!("parent_cx: {:?}", parent_cx);
-            let tracer = get_tracer();
-            let _span = tracer
-                .span_builder("request")
-                .with_kind(SpanKind::Server)
-                .start_with_context(tracer, &parent_cx);
             let llm_provider_endpoint = llm_provider_endpoint.clone();
 
             async move {

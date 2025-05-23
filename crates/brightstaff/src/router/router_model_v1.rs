@@ -1,9 +1,8 @@
 use common::{
-    api::open_ai::{ChatCompletionsRequest, Message},
+    api::open_ai::{ChatCompletionsRequest, ContentType, Message},
     consts::{SYSTEM_ROLE, USER_ROLE},
 };
 use serde::{Deserialize, Serialize};
-use tracing::info;
 
 use super::router_model::{RouterModel, RoutingModelError};
 
@@ -68,7 +67,7 @@ impl RouterModel for RouterModelV1 {
         ChatCompletionsRequest {
             model: self.routing_model.clone(),
             messages: vec![Message {
-                content: Some(message),
+                content: Some(ContentType::Text(message)),
                 role: USER_ROLE.to_string(),
                 model: None,
                 tool_calls: None,
@@ -86,10 +85,6 @@ impl RouterModel for RouterModelV1 {
             return Ok(None);
         }
         let router_resp_fixed = fix_json_response(content);
-        info!(
-            "router response (fixed): {}",
-            router_resp_fixed.replace("\n", "\\n")
-        );
         let router_response: LlmRouterResponse = serde_json::from_str(router_resp_fixed.as_str())?;
 
         let selected_llm = router_response.route.unwrap_or_default().to_string();
@@ -99,6 +94,10 @@ impl RouterModel for RouterModelV1 {
         }
 
         Ok(Some(selected_llm))
+    }
+
+    fn get_model_name(&self) -> String {
+        self.routing_model.clone()
     }
 }
 
@@ -172,22 +171,28 @@ user: "seattle"
         let messages = vec![
             Message {
                 role: "system".to_string(),
-                content: Some("You are a helpful assistant.".to_string()),
+                content: Some(ContentType::Text(
+                    "You are a helpful assistant.".to_string(),
+                )),
                 ..Default::default()
             },
             Message {
                 role: "user".to_string(),
-                content: Some("Hello, I want to book a flight.".to_string()),
+                content: Some(ContentType::Text(
+                    "Hello, I want to book a flight.".to_string(),
+                )),
                 ..Default::default()
             },
             Message {
                 role: "assistant".to_string(),
-                content: Some("Sure, where would you like to go?".to_string()),
+                content: Some(ContentType::Text(
+                    "Sure, where would you like to go?".to_string(),
+                )),
                 ..Default::default()
             },
             Message {
                 role: "user".to_string(),
-                content: Some("seattle".to_string()),
+                content: Some(ContentType::Text("seattle".to_string())),
                 ..Default::default()
             },
         ];
@@ -198,7 +203,7 @@ user: "seattle"
 
         println!("Prompt: {}", prompt);
 
-        assert_eq!(expected_prompt, prompt);
+        assert_eq!(expected_prompt, prompt.to_string());
     }
 }
 

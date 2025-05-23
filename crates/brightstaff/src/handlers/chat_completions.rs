@@ -9,10 +9,11 @@ use http_body_util::{BodyExt, Full, StreamBody};
 use hyper::body::Frame;
 use hyper::header::{self};
 use hyper::{Request, Response, StatusCode};
+use serde_json::Value;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tokio_stream::StreamExt;
-use tracing::{info, warn};
+use tracing::{debug, info, warn};
 
 use crate::router::llm_router::RouterService;
 
@@ -30,19 +31,23 @@ pub async fn chat_completions(
     let mut request_headers = request.headers().clone();
 
     let chat_request_bytes = request.collect().await?.to_bytes();
+
     let chat_completion_request: ChatCompletionsRequest =
         match serde_json::from_slice(&chat_request_bytes) {
             Ok(request) => request,
             Err(err) => {
+                let v: Value = serde_json::from_slice(&chat_request_bytes).unwrap();
                 let err_msg = format!("Failed to parse request body: {}", err);
+                warn!("{}", err_msg);
+                warn!("request body: {}", v.to_string());
                 let mut bad_request = Response::new(full(err_msg));
                 *bad_request.status_mut() = StatusCode::BAD_REQUEST;
                 return Ok(bad_request);
             }
         };
 
-    info!(
-        "request body received: {}",
+    debug!(
+        "request body: {}",
         shorten_string(&serde_json::to_string(&chat_completion_request).unwrap())
     );
 

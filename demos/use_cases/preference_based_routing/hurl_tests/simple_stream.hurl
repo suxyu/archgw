@@ -13,4 +13,4 @@ Content-Type: application/json
 HTTP 200
 [Asserts]
 header "content-type" matches /text\/event-stream/
-body matches /^data: .*?o4-mini.*?\n/
+body matches /^data: .*?gpt-4o.*?\n/

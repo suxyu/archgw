@@ -1,5 +1,5 @@
 use common::api::open_ai::{
-    ChatCompletionsResponse, Choice, FunctionCallDetail, Message, ToolCall, ToolType, Usage,
+    ChatCompletionsResponse, Choice, ContentType, FunctionCallDetail, Message, ToolCall, ToolType, Usage
 };
 use common::configuration::Configuration;
 use http::StatusCode;
@@ -431,7 +431,7 @@ fn prompt_gateway_request_to_llm_gateway() {
             index: Some(0),
             message: Message {
                 role: "assistant".to_string(),
-                content: Some("hello from fake llm gateway".to_string()),
+                content: Some(ContentType::Text("hello from fake llm gateway".to_string())),
                 model: None,
                 tool_calls: None,
                 tool_call_id: None,

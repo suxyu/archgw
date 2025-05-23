@@ -1,7 +1,7 @@
 use crate::metrics::Metrics;
 use common::api::open_ai::{
     ChatCompletionStreamResponseServerEvents, ChatCompletionsRequest, ChatCompletionsResponse,
-    Message, StreamOptions,
+    ContentType, Message, StreamOptions,
 };
 use common::configuration::{LlmProvider, LlmProviderType, Overrides};
 use common::consts::{
@@ -369,7 +369,12 @@ impl HttpContext for StreamContext {
             .messages
             .iter()
             .fold(String::new(), |acc, m| {
-                acc + " " + m.content.as_ref().unwrap_or(&String::new())
+                acc + " "
+                    + m.content
+                        .as_ref()
+                        .unwrap_or(&ContentType::Text(String::new()))
+                        .to_string()
+                        .as_str()
             });
         // enforce ratelimits on ingress
         if let Err(e) = self.enforce_ratelimits(&deserialized_body.model, input_tokens_str.as_str())

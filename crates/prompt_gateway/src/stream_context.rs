@@ -2,7 +2,7 @@ use crate::metrics::Metrics;
 use crate::tools::compute_request_path_body;
 use common::api::open_ai::{
     to_server_events, ArchState, ChatCompletionStreamResponse, ChatCompletionsRequest,
-    ChatCompletionsResponse, Message, ToolCall,
+    ChatCompletionsResponse, ContentType, Message, ToolCall,
 };
 use common::configuration::{Endpoint, Overrides, PromptTarget, Tracing};
 use common::consts::{
@@ -215,7 +215,7 @@ impl StreamContext {
                     Some(system_prompt) => {
                         let system_prompt_message = Message {
                             role: SYSTEM_ROLE.to_string(),
-                            content: Some(system_prompt.clone()),
+                            content: Some(ContentType::Text(system_prompt.clone())),
                             model: None,
                             tool_calls: None,
                             tool_call_id: None,
@@ -279,6 +279,13 @@ impl StreamContext {
             //TODO: add resolver name to the response so the client can send the response back to the correct resolver
 
             let direct_response_str = if self.streaming_response {
+                let content = model_server_response.choices[0]
+                    .message
+                    .content
+                    .as_ref()
+                    .unwrap()
+                    .clone();
+
                 let chunks = vec![
                     ChatCompletionStreamResponse::new(
                         self.arch_fc_response.clone(),
@@ -287,14 +294,7 @@ impl StreamContext {
                         None,
                     ),
                     ChatCompletionStreamResponse::new(
-                        Some(
-                            model_server_response.choices[0]
-                                .message
-                                .content
-                                .as_ref()
-                                .unwrap()
-                                .clone(),
-                        ),
+                        Some(content.to_string()),
                         None,
                         Some(format!("{}-Chat", ARCH_FC_MODEL_NAME.to_owned())),
                         None,
@@ -542,7 +542,7 @@ impl StreamContext {
         messages.push({
             Message {
                 role: USER_ROLE.to_string(),
-                content: Some(final_prompt),
+                content: Some(ContentType::Text(final_prompt)),
                 model: None,
                 tool_calls: None,
                 tool_call_id: None,
@@ -612,7 +612,7 @@ impl StreamContext {
         if system_prompt.is_some() {
             let system_prompt_message = Message {
                 role: SYSTEM_ROLE.to_string(),
-                content: system_prompt,
+                content: Some(ContentType::Text(system_prompt.unwrap())),
                 model: None,
                 tool_calls: None,
                 tool_call_id: None,
@@ -639,7 +639,9 @@ impl StreamContext {
         } else {
             Message {
                 role: ASSISTANT_ROLE.to_string(),
-                content: self.arch_fc_response.as_ref().cloned(),
+                content: Some(ContentType::Text(
+                    self.arch_fc_response.as_ref().unwrap().clone(),
+                )),
                 model: Some(ARCH_FC_MODEL_NAME.to_string()),
                 tool_calls: None,
                 tool_call_id: None,
@@ -650,7 +652,9 @@ impl StreamContext {
     pub fn generate_api_response_message(&mut self) -> Message {
         Message {
             role: TOOL_ROLE.to_string(),
-            content: self.tool_call_response.clone(),
+            content: Some(ContentType::Text(
+                self.tool_call_response.as_ref().unwrap().clone(),
+            )),
             model: None,
             tool_calls: None,
             tool_call_id: Some(self.tool_calls.as_ref().unwrap()[0].id.clone()),
@@ -688,7 +692,14 @@ impl StreamContext {
                         None,
                     ),
                     ChatCompletionStreamResponse::new(
-                        chat_completion_response.choices[0].message.content.clone(),
+                        Some(
+                            chat_completion_response.choices[0]
+                                .message
+                                .content
+                                .as_ref()
+                                .unwrap()
+                                .to_string(),
+                        ),
                         None,
                         Some(chat_completion_response.model.clone()),
                         None,
@@ -727,7 +738,7 @@ impl StreamContext {
             Some(system_prompt) => {
                 let system_prompt_message = Message {
                     role: SYSTEM_ROLE.to_string(),
-                    content: Some(system_prompt.clone()),
+                    content: Some(ContentType::Text(system_prompt.clone())),
                     model: None,
                     tool_calls: None,
                     tool_call_id: None,
@@ -748,7 +759,7 @@ impl StreamContext {
         let message = format!("{}\ncontext: {}", user_message.content.unwrap(), api_resp);
         messages.push(Message {
             role: USER_ROLE.to_string(),
-            content: Some(message),
+            content: Some(ContentType::Text(message)),
             model: None,
             tool_calls: None,
             tool_call_id: None,
@@ -781,7 +792,7 @@ fn check_intent_matched(model_server_response: &ChatCompletionsResponse) -> bool
         .first()
         .and_then(|choice| choice.message.content.as_ref());
 
-    let content_has_value = content.is_some() && !content.unwrap().is_empty();
+    let content_has_value = content.is_some() && !content.unwrap().to_string().is_empty();
 
     let tool_calls = model_server_response
         .choices
@@ -807,7 +818,7 @@ impl Client for StreamContext {
 
 #[cfg(test)]
 mod test {
-    use common::api::open_ai::{ChatCompletionsResponse, Choice, Message, ToolCall};
+    use common::api::open_ai::{ChatCompletionsResponse, Choice, ContentType, Message, ToolCall};
 
     use crate::stream_context::check_intent_matched;
 
@@ -816,7 +827,7 @@ mod test {
         let model_server_response = ChatCompletionsResponse {
             choices: vec![Choice {
                 message: Message {
-                    content: Some("".to_string()),
+                    content: Some(ContentType::Text("".to_string())),
                     tool_calls: Some(vec![]),
                     role: "assistant".to_string(),
                     model: None,
@@ -835,7 +846,7 @@ mod test {
         let model_server_response = ChatCompletionsResponse {
             choices: vec![Choice {
                 message: Message {
-                    content: Some("hello".to_string()),
+                    content: Some(ContentType::Text("hello".to_string())),
                     tool_calls: Some(vec![]),
                     role: "assistant".to_string(),
                     model: None,
@@ -854,7 +865,7 @@ mod test {
         let model_server_response = ChatCompletionsResponse {
             choices: vec![Choice {
                 message: Message {
-                    content: Some("".to_string()),
+                    content: Some(ContentType::Text("".to_string())),
                     tool_calls: Some(vec![ToolCall {
                         id: "1".to_string(),
                         function: common::api::open_ai::FunctionCallDetail {
