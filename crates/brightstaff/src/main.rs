@@ -84,7 +84,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     info!("listening on http://{}", bind_address);
     let listener = TcpListener::bind(bind_address).await?;
 
-    let model = arch_config.routing.as_ref().unwrap().model.clone();
+    let model = arch_config
+        .routing
+        .as_ref()
+        .and_then(|r| Some(r.model.clone()))
+        .unwrap_or_else(|| "none".to_string());
 
     let router_service: Arc<RouterService> = Arc::new(RouterService::new(
         arch_config.llm_providers.clone(),
