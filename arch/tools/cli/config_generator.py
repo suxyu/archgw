@@ -81,7 +81,10 @@ def validate_and_render_schema():
 
     updated_llm_providers = []
     llm_provider_name_set = set()
+    llms_with_usage = []
     for llm_provider in config_yaml["llm_providers"]:
+        if llm_provider.get("usage", None):
+            llms_with_usage.append(llm_provider["name"])
         if llm_provider.get("name") in llm_provider_name_set:
             raise Exception(
                 f"Duplicate llm_provider name {llm_provider.get('name')}, please provide unique name for each llm_provider"
@@ -136,6 +139,15 @@ def validate_and_render_schema():
             llm_provider["port"] = port
             llm_provider["protocol"] = protocol
             llms_with_endpoint.append(llm_provider)
+
+    if (
+        len(llms_with_usage) > 0
+        and config_yaml.get("routing", {}).get("model", None) == None
+    ):
+        llms_with_usage_names = ", ".join(llms_with_usage)
+        raise Exception(
+            f"LLMs with usage found ({llms_with_usage_names}), please provide model in routing section in your arch_config.yaml file"
+        )
 
     config_yaml["llm_providers"] = updated_llm_providers
 

@@ -6,7 +6,6 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 
-use super::open_ai::ContentType;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HallucinationClassificationRequest {
