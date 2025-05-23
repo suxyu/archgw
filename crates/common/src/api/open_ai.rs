@@ -330,6 +330,7 @@ impl TryFrom<&str> for ChatCompletionStreamResponseServerEvents {
         let response_chunks: VecDeque<ChatCompletionStreamResponse> = value
             .lines()
             .filter(|line| line.starts_with("data: "))
+            .filter(|line| !line.starts_with(r#"data: {"type": "ping"}"#))
             .map(|line| line.get(6..).unwrap())
             .filter(|data_chunk| *data_chunk != "[DONE]")
             .map(serde_json::from_str::<ChatCompletionStreamResponse>)
@@ -675,6 +676,39 @@ data: [DONE]
         assert_eq!(
             sever_events.to_string(),
             "Hello! How can I assist you today?"
+        );
+    }
+
+    #[test]
+    fn stream_chunk_parse_claude() {
+        const CHUNK_RESPONSE: &str = r#"data: {"id":"msg_01DZDMxYSgq8aPQxMQoBv6Kb","choices":[{"index":0,"delta":{"role":"assistant"}}],"created":1747685264,"model":"claude-3-7-sonnet-latest","object":"chat.completion.chunk"}
+
+data: {"type": "ping"}
+
+data: {"id":"msg_01DZDMxYSgq8aPQxMQoBv6Kb","choices":[{"index":0,"delta":{"content":"Hello!"}}],"created":1747685264,"model":"claude-3-7-sonnet-latest","object":"chat.completion.chunk"}
+
+data: {"id":"msg_01DZDMxYSgq8aPQxMQoBv6Kb","choices":[{"index":0,"delta":{"content":" How can I assist you today? Whether"}}],"created":1747685264,"model":"claude-3-7-sonnet-latest","object":"chat.completion.chunk"}
+
+data: {"id":"msg_01DZDMxYSgq8aPQxMQoBv6Kb","choices":[{"index":0,"delta":{"content":" you have a question, need information"}}],"created":1747685264,"model":"claude-3-7-sonnet-latest","object":"chat.completion.chunk"}
+
+data: {"id":"msg_01DZDMxYSgq8aPQxMQoBv6Kb","choices":[{"index":0,"delta":{"content":", or just want to chat about"}}],"created":1747685264,"model":"claude-3-7-sonnet-latest","object":"chat.completion.chunk"}
+
+data: {"id":"msg_01DZDMxYSgq8aPQxMQoBv6Kb","choices":[{"index":0,"delta":{"content":" something, I'm here to help. What woul"}}],"created":1747685264,"model":"claude-3-7-sonnet-latest","object":"chat.completion.chunk"}
+
+data: {"id":"msg_01DZDMxYSgq8aPQxMQoBv6Kb","choices":[{"index":0,"delta":{"content":"d you like to talk about?"}}],"created":1747685264,"model":"claude-3-7-sonnet-latest","object":"chat.completion.chunk"}
+
+data: {"id":"msg_01DZDMxYSgq8aPQxMQoBv6Kb","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"created":1747685264,"model":"claude-3-7-sonnet-latest","object":"chat.completion.chunk"}
+
+data: [DONE]
+"#;
+
+        let sever_events: ChatCompletionStreamResponseServerEvents =
+            ChatCompletionStreamResponseServerEvents::try_from(CHUNK_RESPONSE).unwrap();
+        assert_eq!(sever_events.events.len(), 8);
+
+        assert_eq!(
+            sever_events.to_string(),
+            "Hello! How can I assist you today? Whether you have a question, need information, or just want to chat about something, I'm here to help. What would you like to talk about?"
         );
     }
 }

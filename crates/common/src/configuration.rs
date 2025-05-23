@@ -143,19 +143,28 @@ pub struct EmbeddingProviver {
     pub model: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum LlmProviderType {
-    #[serde(rename = "openai")]
-    OpenAI,
+    #[serde(rename = "claude")]
+    Claude,
+    #[serde(rename = "deepseek")]
+    Deepseek,
+    #[serde(rename = "groq")]
+    Groq,
     #[serde(rename = "mistral")]
     Mistral,
+    #[serde(rename = "openai")]
+    OpenAI,
 }
 
 impl Display for LlmProviderType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            LlmProviderType::OpenAI => write!(f, "openai"),
+            LlmProviderType::Claude => write!(f, "claude"),
+            LlmProviderType::Deepseek => write!(f, "deepseek"),
+            LlmProviderType::Groq => write!(f, "groq"),
             LlmProviderType::Mistral => write!(f, "mistral"),
+            LlmProviderType::OpenAI => write!(f, "openai"),
         }
     }
 }
@@ -173,6 +182,23 @@ pub struct LlmProvider {
     pub port: Option<u16>,
     pub rate_limits: Option<LlmRatelimit>,
     pub usage: Option<String>,
+}
+
+impl Default for LlmProvider {
+    fn default() -> Self {
+        Self {
+            name: "openai".to_string(),
+            provider_interface: LlmProviderType::OpenAI,
+            access_key: None,
+            model: None,
+            default: Some(true),
+            stream: Some(false),
+            endpoint: None,
+            port: None,
+            rate_limits: None,
+            usage: None,
+        }
+    }
 }
 
 impl Display for LlmProvider {

@@ -70,8 +70,11 @@ properties:
         provider_interface:
           type: string
           enum:
-            - openai
+            - claude
+            - deepseek
+            - groq
             - mistral
+            - openai
         access_key:
           type: string
         model:

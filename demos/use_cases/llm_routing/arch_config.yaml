@@ -12,7 +12,6 @@ llm_providers:
     access_key: $OPENAI_API_KEY
     provider_interface: openai
     model: gpt-4o-mini
-    default: true
 
   - name: gpt-4o
     access_key: $OPENAI_API_KEY
@@ -24,17 +23,21 @@ llm_providers:
     provider_interface: mistral
     model: ministral-3b-latest
 
+  - name: claude-sonnet
+    access_key: $ANTHROPY_API_KEY
+    provider_interface: claude
+    model: claude-3-7-sonnet-latest
+    default: true
+
   - name: deepseek
     access_key: $DEEPSEEK_API_KEY
-    provider_interface: openai
+    provider_interface: deepseek
     model: deepseek-reasoner
-    base_url: https://api.deepseek.com/
 
   - name: groq
     access_key: $GROQ_API_KEY
-    provider_interface: openai
+    provider_interface: groq
     model: llama-3.1-8b-instant
-    base_url: https://api.groq.com
 
 tracing:
   random_sampling: 100

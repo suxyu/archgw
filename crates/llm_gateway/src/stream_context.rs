@@ -89,15 +89,7 @@ impl StreamContext {
             provider_hint,
         ));
 
-        // Check if we need to modify the path based on the provider's base_url
-        let needs_openai_prefix = self
-            .llm_provider
-            .as_ref()
-            .and_then(|provider| provider.endpoint.as_ref())
-            .map(|url| url.contains("api.groq.com"))
-            .unwrap_or(false);
-
-        if needs_openai_prefix {
+        if self.llm_provider.as_ref().unwrap().provider_interface == LlmProviderType::Groq {
             if let Some(path) = self.get_http_request_header(":path") {
                 if path.starts_with("/v1/") {
                     let new_path = format!("/openai{}", path);
@@ -221,14 +213,7 @@ impl HttpContext for StreamContext {
             self.llm_provider = Some(Rc::new(LlmProvider {
                 name: routing_header_value.to_string(),
                 provider_interface: LlmProviderType::OpenAI,
-                access_key: None,
-                endpoint: None,
-                model: None,
-                default: None,
-                stream: None,
-                port: None,
-                rate_limits: None,
-                usage: None,
+                ..Default::default()
             }));
         } else {
             self.select_llm_provider();
@@ -539,6 +524,9 @@ impl HttpContext for StreamContext {
             }
             streaming_chunk
         } else {
+            if body_size == 0 {
+                return Action::Continue;
+            }
             debug!("non streaming response bytes read: 0:{}", body_size);
             match self.get_http_response_body(0, body_size) {
                 Some(body) => body,

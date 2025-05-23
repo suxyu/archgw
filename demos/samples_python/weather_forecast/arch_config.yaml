@@ -19,9 +19,8 @@ overrides:
 llm_providers:
   - name: groq
     access_key: $GROQ_API_KEY
-    provider_interface: openai
+    provider_interface: groq
     model: llama-3.2-3b-preview
-    base_url: https://api.groq.com
 
   - name: gpt-4o
     access_key: $OPENAI_API_KEY

@@ -17,6 +17,12 @@ do
   docker compose up -d 2>&1 > /dev/null
   echo "starting hurl tests"
   hurl --test hurl_tests/*.hurl
+  if [ $? -ne 0 ]; then
+    echo "Hurl tests failed for $demo"
+    echo "docker logs for archgw:"
+    docker logs archgw
+    exit 1
+  fi
   echo "stopping docker containers and archgw"
   archgw down
   docker compose down -v

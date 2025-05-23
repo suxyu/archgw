@@ -103,6 +103,7 @@ def start_arch(arch_config_file, env, log_timeout=120, foreground=False):
             # Check if timeout is reached
             if elapsed_time > log_timeout:
                 log.info(f"stopping log monitoring after {log_timeout} seconds.")
+                stream_gateway_logs(follow=False)
                 sys.exit(1)
 
             if prompt_gateway_health_check_status or llm_gateway_health_check_status:
