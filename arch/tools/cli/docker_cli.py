@@ -52,7 +52,7 @@ def docker_start_archgw_detached(
     port_mappings = [
         f"{prompt_gateway_port}:{prompt_gateway_port}",
         f"{llm_gateway_port}:{llm_gateway_port}",
-        "9901:19901",
+        "19901:9901",
     ]
     port_mappings_args = [item for port in port_mappings for item in ("-p", port)]
 
