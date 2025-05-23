@@ -29,6 +29,11 @@ llm_providers:
     model: claude-3-7-sonnet-latest
     default: true
 
+  - name: claude-sonnet-4
+    access_key: $ANTHROPY_API_KEY
+    provider_interface: claude
+    model: claude-sonnet-4-0
+
   - name: deepseek
     access_key: $DEEPSEEK_API_KEY
     provider_interface: deepseek
