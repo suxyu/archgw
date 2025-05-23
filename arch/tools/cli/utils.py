@@ -5,7 +5,6 @@ import sys
 import yaml
 import logging
 
-from cli.consts import ACCESS_LOG_FILES
 
 logging.basicConfig(
     level=logging.INFO,
@@ -77,14 +76,18 @@ def stream_access_logs(follow):
     """
     Get the archgw access logs
     """
-    log_file_pattern_expanded = os.path.expanduser(ACCESS_LOG_FILES)
-    log_files = glob.glob(log_file_pattern_expanded)
 
-    stream_command = ["tail"]
-    if follow:
-        stream_command.append("-f")
+    follow_arg = "-f" if follow else ""
 
-    stream_command.extend(log_files)
+    stream_command = [
+        "docker",
+        "exec",
+        "archgw",
+        "sh",
+        "-c",
+        f"tail {follow_arg} /var/log/access_*.log",
+    ]
+
     subprocess.run(
         stream_command,
         check=True,
