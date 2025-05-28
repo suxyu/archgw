@@ -1,5 +1,6 @@
 use brightstaff::handlers::chat_completions::chat_completions;
 use brightstaff::router::llm_router::RouterService;
+use brightstaff::utils::tracing::init_tracer;
 use bytes::Bytes;
 use common::configuration::Configuration;
 use http_body_util::{combinators::BoxBody, BodyExt, Empty};
@@ -11,13 +12,10 @@ use hyper_util::rt::TokioIo;
 use opentelemetry::trace::FutureExt;
 use opentelemetry::{global, Context};
 use opentelemetry_http::HeaderExtractor;
-use opentelemetry_sdk::{propagation::TraceContextPropagator, trace::SdkTracerProvider};
-use opentelemetry_stdout::SpanExporter;
 use std::sync::Arc;
 use std::{env, fs};
 use tokio::net::TcpListener;
 use tracing::{debug, info};
-use tracing_subscriber::EnvFilter;
 
 pub mod router;
 
@@ -30,18 +28,6 @@ fn extract_context_from_request(req: &Request<Incoming>) -> Context {
     })
 }
 
-fn init_tracer() -> SdkTracerProvider {
-    global::set_text_map_propagator(TraceContextPropagator::new());
-    // Install stdout exporter pipeline to be able to retrieve the collected spans.
-    // For the demonstration, use `Sampler::AlwaysOn` sampler to sample all traces.
-    let provider = SdkTracerProvider::builder()
-        .with_simple_exporter(SpanExporter::default())
-        .build();
-
-    global::set_tracer_provider(provider.clone());
-    provider
-}
-
 fn empty() -> BoxBody<Bytes, hyper::Error> {
     Empty::<Bytes>::new()
         .map_err(|never| match never {})
@@ -51,15 +37,9 @@ fn empty() -> BoxBody<Bytes, hyper::Error> {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let _tracer_provider = init_tracer();
-    tracing_subscriber::fmt()
-        .with_env_filter(
-            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
-        )
-        .init();
-
     let bind_address = env::var("BIND_ADDRESS").unwrap_or_else(|_| BIND_ADDRESS.to_string());
 
-    //loading arch_config.yaml file
+    // loading arch_config.yaml file
     let arch_config_path =
         env::var("ARCH_CONFIG_PATH").unwrap_or_else(|_| "./arch_config.yaml".to_string());
     info!("Loading arch_config.yaml from {}", arch_config_path);
@@ -87,7 +67,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let model = arch_config
         .routing
         .as_ref()
-        .and_then(|r| Some(r.model.clone()))
+        .map(|r| r.model.clone())
         .unwrap_or_else(|| "none".to_string());
 
     let router_service: Arc<RouterService> = Arc::new(RouterService::new(

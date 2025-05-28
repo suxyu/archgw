@@ -9,6 +9,8 @@ use hyper::header;
 use thiserror::Error;
 use tracing::{debug, info, warn};
 
+use crate::router::router_model_v1::{self};
+
 use super::router_model::RouterModel;
 
 pub struct RouterService {
@@ -63,9 +65,10 @@ impl RouterService {
             llm_providers_with_usage_yaml.replace("\n", "\\n")
         );
 
-        let router_model = Arc::new(super::router_model_v1::RouterModelV1::new(
+        let router_model = Arc::new(router_model_v1::RouterModelV1::new(
             llm_providers_with_usage_yaml.clone(),
             routing_model_name.clone(),
+            router_model_v1::MAX_TOKEN_LEN,
         ));
 
         RouterService {
