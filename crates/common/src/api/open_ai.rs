@@ -448,9 +448,9 @@ impl From<Vec<LlmProvider>> for Models {
         let data = llm_providers
             .iter()
             .map(|provider| ModelDetail {
-                id: provider.model.as_ref().unwrap().clone(),
+                id: provider.name.clone(),
                 object: "model".to_string(),
-                created: 1721172741,
+                created: 0,
                 owned_by: "system".to_string(),
             })
             .collect();
