@@ -1,4 +1,5 @@
 use brightstaff::handlers::chat_completions::chat_completions;
+use brightstaff::handlers::models::list_models;
 use brightstaff::router::llm_router::RouterService;
 use brightstaff::utils::tracing::init_tracer;
 use bytes::Bytes;
@@ -52,6 +53,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let arch_config = Arc::new(config);
 
+    let llm_providers = Arc::new(arch_config.llm_providers.clone());
+
     debug!(
         "arch_config: {:?}",
         &serde_json::to_string(arch_config.as_ref()).unwrap()
@@ -84,10 +87,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let router_service = Arc::clone(&router_service);
         let llm_provider_endpoint = llm_provider_endpoint.clone();
 
+        let llm_providers = llm_providers.clone();
         let service = service_fn(move |req| {
             let router_service = Arc::clone(&router_service);
             let parent_cx = extract_context_from_request(&req);
             let llm_provider_endpoint = llm_provider_endpoint.clone();
+            let llm_providers = llm_providers.clone();
 
             async move {
                 match (req.method(), req.uri().path()) {
@@ -95,6 +100,35 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                         chat_completions(req, router_service, llm_provider_endpoint)
                             .with_context(parent_cx)
                             .await
+                    }
+                    (&Method::GET, "/v1/models") => {
+                        Ok(list_models(llm_providers).await)
+                    }
+                    (&Method::OPTIONS, "/v1/models") => {
+                        let mut response = Response::new(empty());
+                        *response.status_mut() = StatusCode::NO_CONTENT;
+                        response.headers_mut().insert(
+                            "Allow",
+                            "GET, OPTIONS".parse().unwrap(),
+                        );
+                        response.headers_mut().insert(
+                            "Access-Control-Allow-Origin",
+                            "*".parse().unwrap(),
+                        );
+                        response.headers_mut().insert(
+                            "Access-Control-Allow-Headers",
+                            "Authorization, Content-Type".parse().unwrap(),
+                        );
+                        response.headers_mut().insert(
+                            "Access-Control-Allow-Methods",
+                            "GET, POST, OPTIONS".parse().unwrap(),
+                        );
+                        response.headers_mut().insert(
+                            "Content-Type",
+                            "application/json".parse().unwrap(),
+                        );
+
+                        Ok(response)
                     }
                     _ => {
                         let mut not_found = Response::new(empty());

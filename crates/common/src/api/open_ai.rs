@@ -1,7 +1,10 @@
-use crate::consts::{ARCH_FC_MODEL_NAME, ASSISTANT_ROLE};
+use crate::{
+    configuration::LlmProvider,
+    consts::{ARCH_FC_MODEL_NAME, ASSISTANT_ROLE},
+};
+use core::{panic, str};
 use serde::{ser::SerializeMap, Deserialize, Serialize};
 use serde_yaml::Value;
-use core::panic;
 use std::{
     collections::{HashMap, VecDeque},
     fmt::Display,
@@ -420,6 +423,45 @@ pub fn to_server_events(chunks: Vec<ChatCompletionStreamResponse>) -> String {
     response_str
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ModelDetail {
+    pub id: String,
+    pub object: String,
+    pub created: usize,
+    pub owned_by: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum ModelObject {
+    #[serde(rename = "list")]
+    List,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Models {
+    pub object: ModelObject,
+    pub data: Vec<ModelDetail>,
+}
+
+impl From<Vec<LlmProvider>> for Models {
+    fn from(llm_providers: Vec<LlmProvider>) -> Self {
+        let data = llm_providers
+            .iter()
+            .map(|provider| ModelDetail {
+                id: provider.model.as_ref().unwrap().clone(),
+                object: "model".to_string(),
+                created: 1721172741,
+                owned_by: "system".to_string(),
+            })
+            .collect();
+
+        Models {
+            object: ModelObject::List,
+            data,
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use crate::api::open_ai::{ChatCompletionsRequest, ContentType, MultiPartContentType};
@@ -775,7 +817,10 @@ data: [DONE]
         if let Some(ContentType::MultiPart(multi_part_content)) =
             chat_completions_request.messages[0].content.as_ref()
         {
-            assert_eq!(multi_part_content[0].content_type, MultiPartContentType::Text);
+            assert_eq!(
+                multi_part_content[0].content_type,
+                MultiPartContentType::Text
+            );
             assert_eq!(
                 multi_part_content[0].text,
                 Some("What city do you want to know the weather for?".to_string())
@@ -815,21 +860,23 @@ data: [DONE]
             chat_completions_request.messages[0].content.as_ref()
         {
             assert_eq!(multi_part_content.len(), 2);
-            assert_eq!(multi_part_content[0].content_type, MultiPartContentType::Text);
+            assert_eq!(
+                multi_part_content[0].content_type,
+                MultiPartContentType::Text
+            );
             assert_eq!(
                 multi_part_content[0].text,
                 Some("What city do you want to know the weather for?".to_string())
             );
-            assert_eq!(multi_part_content[1].content_type, MultiPartContentType::Text);
             assert_eq!(
-                multi_part_content[1].text,
-                Some("hello world".to_string())
+                multi_part_content[1].content_type,
+                MultiPartContentType::Text
             );
+            assert_eq!(multi_part_content[1].text, Some("hello world".to_string()));
         } else {
             panic!("Expected MultiPartContent");
         }
     }
-
 
     #[test]
     fn stream_chunk_parse_claude() {

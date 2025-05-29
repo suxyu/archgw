@@ -3,7 +3,6 @@ use std::sync::Arc;
 use bytes::Bytes;
 use common::api::open_ai::ChatCompletionsRequest;
 use common::consts::ARCH_PROVIDER_HINT_HEADER;
-use common::utils::shorten_string;
 use http_body_util::combinators::BoxBody;
 use http_body_util::{BodyExt, Full, StreamBody};
 use hyper::body::Frame;
@@ -39,7 +38,7 @@ pub async fn chat_completions(
                 let v: Value = serde_json::from_slice(&chat_request_bytes).unwrap();
                 let err_msg = format!("Failed to parse request body: {}", err);
                 warn!("{}", err_msg);
-                warn!("request body: {}", v.to_string());
+                warn!("arch-router request body: {}", v.to_string());
                 let mut bad_request = Response::new(full(err_msg));
                 *bad_request.status_mut() = StatusCode::BAD_REQUEST;
                 return Ok(bad_request);
@@ -47,8 +46,8 @@ pub async fn chat_completions(
         };
 
     debug!(
-        "request body: {}",
-        shorten_string(&serde_json::to_string(&chat_completion_request).unwrap())
+        "arch-router request body: {}",
+        &serde_json::to_string(&chat_completion_request).unwrap()
     );
 
     let trace_parent = request_headers
@@ -56,7 +55,7 @@ pub async fn chat_completions(
         .find(|(ty, _)| ty.as_str() == "traceparent")
         .map(|(_, value)| value.to_str().unwrap_or_default().to_string());
 
-    let selected_llm = match router_service
+    let mut selected_llm = match router_service
         .determine_route(&chat_completion_request.messages, trace_parent.clone())
         .await
     {
@@ -68,6 +67,11 @@ pub async fn chat_completions(
             return Ok(internal_error);
         }
     };
+
+    if selected_llm.is_none() {
+        debug!("No LLM model selected, using default from request");
+        selected_llm = Some(chat_completion_request.model.clone());
+    }
 
     info!(
         "sending request to llm provider: {} with llm model: {:?}",

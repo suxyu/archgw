@@ -8,6 +8,7 @@ listeners:
     timeout: 30s
 
 llm_providers:
+
   - name: gpt-4o-mini
     access_key: $OPENAI_API_KEY
     provider_interface: openai
@@ -17,6 +18,7 @@ llm_providers:
     access_key: $OPENAI_API_KEY
     provider_interface: openai
     model: gpt-4o
+    default: true
 
   - name: ministral-3b
     access_key: $MISTRAL_API_KEY
@@ -27,7 +29,6 @@ llm_providers:
     access_key: $ANTHROPY_API_KEY
     provider_interface: claude
     model: claude-3-7-sonnet-latest
-    default: true
 
   - name: claude-sonnet-4
     access_key: $ANTHROPY_API_KEY
