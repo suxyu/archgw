@@ -116,62 +116,40 @@ pub async fn chat_completions(
         headers.insert(header_name, header_value.clone());
     }
 
-    if chat_completion_request.stream {
-        // channel to create async stream
-        let (tx, rx) = mpsc::channel::<Bytes>(16);
+    // channel to create async stream
+    let (tx, rx) = mpsc::channel::<Bytes>(16);
 
-        // Spawn a task to send data as it becomes available
-        tokio::spawn(async move {
-            let mut byte_stream = llm_response.bytes_stream();
+    // Spawn a task to send data as it becomes available
+    tokio::spawn(async move {
+        let mut byte_stream = llm_response.bytes_stream();
 
-            while let Some(item) = byte_stream.next().await {
-                let item = match item {
-                    Ok(item) => item,
-                    Err(err) => {
-                        warn!("Error receiving chunk: {:?}", err);
-                        break;
-                    }
-                };
-
-                if tx.send(item).await.is_err() {
-                    warn!("Receiver dropped");
+        while let Some(item) = byte_stream.next().await {
+            let item = match item {
+                Ok(item) => item,
+                Err(err) => {
+                    warn!("Error receiving chunk: {:?}", err);
                     break;
                 }
-            }
-        });
+            };
 
-        let stream = ReceiverStream::new(rx).map(|chunk| Ok::<_, hyper::Error>(Frame::data(chunk)));
-
-        let stream_body = BoxBody::new(StreamBody::new(stream));
-
-        match response.body(stream_body) {
-            Ok(response) => Ok(response),
-            Err(err) => {
-                let err_msg = format!("Failed to create response: {}", err);
-                let mut internal_error = Response::new(full(err_msg));
-                *internal_error.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                Ok(internal_error)
+            if tx.send(item).await.is_err() {
+                warn!("Receiver dropped");
+                break;
             }
         }
-    } else {
-        let body = match llm_response.text().await {
-            Ok(body) => body,
-            Err(err) => {
-                let err_msg = format!("Failed to read response: {}", err);
-                let mut internal_error = Response::new(full(err_msg));
-                *internal_error.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                return Ok(internal_error);
-            }
-        };
+    });
 
-        match response.body(full(body)) {
-            Ok(response) => Ok(response),
-            Err(err) => {
-                let err_msg = format!("Failed to create response: {}", err);
-                let mut internal_error = Response::new(full(err_msg));
-                *internal_error.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                Ok(internal_error)
-            }
+    let stream = ReceiverStream::new(rx).map(|chunk| Ok::<_, hyper::Error>(Frame::data(chunk)));
+
+    let stream_body = BoxBody::new(StreamBody::new(stream));
+
+    match response.body(stream_body) {
+        Ok(response) => Ok(response),
+        Err(err) => {
+            let err_msg = format!("Failed to create response: {}", err);
+            let mut internal_error = Response::new(full(err_msg));
+            *internal_error.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
+            Ok(internal_error)
         }
     }
 }

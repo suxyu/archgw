@@ -1,0 +1,57 @@
+name: e2e demo preference based routing tests
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  e2e_demo_tests:
+    runs-on: ubuntu-latest-m
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: build arch docker image
+        run: |
+          docker build  -f arch/Dockerfile . -t katanemo/archgw -t katanemo/archgw:0.3.0
+
+      - name: install poetry
+        run: |
+          export POETRY_VERSION=1.8.5
+          curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: setup python venv
+        run: |
+          python -m venv venv
+
+      - name: install hurl
+        run: |
+          curl --location --remote-name https://github.com/Orange-OpenSource/hurl/releases/download/4.0.0/hurl_4.0.0_amd64.deb
+          sudo dpkg -i hurl_4.0.0_amd64.deb
+
+      - name: install model server, arch gateway and test dependencies
+        run: |
+          source venv/bin/activate
+          cd model_server/ && echo "installing model server" && poetry install
+          cd ../arch/tools && echo "installing archgw cli" && poetry install
+          cd ../../demos/shared/test_runner && echo "installing test dependencies" && poetry install
+
+      - name: run demo tests
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          source venv/bin/activate
+          cd demos/shared/test_runner && sh run_demo_tests.sh use_cases/preference_based_routing

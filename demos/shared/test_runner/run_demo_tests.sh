@@ -1,11 +1,20 @@
 #!/bin/bash
 set -eu
 
-echo "docker images"
-docker images
+# load demo name from arguments
+if [ $# -eq 0 ]; then
+  echo "No demo names provided. Please provide demo names as arguments."
+  # print usage
+  echo "Usage: $0 <demo_name1> <demo_name2> ..."
+  exit 1
+fi
 
-# for demo in currency_exchange hr_agent
-for demo in samples_python/currency_exchange use_cases/preference_based_routing
+# extract demo names from arguments
+DEMOS="$@"
+
+echo "Running tests for demos: $DEMOS"
+
+for demo in $DEMOS
 do
   echo "******************************************"
   echo "Running tests for $demo ..."
@@ -16,11 +25,10 @@ do
   echo "starting docker containers"
   docker compose up -d 2>&1 > /dev/null
   echo "starting hurl tests"
-  hurl --test hurl_tests/*.hurl
-  if [ $? -ne 0 ]; then
+  if ! hurl hurl_tests/*.hurl; then
     echo "Hurl tests failed for $demo"
     echo "docker logs for archgw:"
-    docker logs archgw
+    docker logs archgw | tail -n 100
     exit 1
   fi
   echo "stopping docker containers and archgw"
