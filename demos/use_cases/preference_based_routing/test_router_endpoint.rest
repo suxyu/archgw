@@ -1,10 +1,10 @@
 @arch_llm_router_endpoint = http://35.192.87.187:8000
 
-POST {{arch_llm_router_endpoint}}/v1/chat/completions HTTP/1.1
+POST http://34.46.85.85:8000/v1/chat/completions HTTP/1.1
 Content-Type: application/json
 
 {
-  "model": "cotran2/llama-1b-4-26",
+  "model": "cotran2/qwen-4-epoch-2600",
   "messages": [
     {
       "role": "user",

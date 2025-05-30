@@ -1,7 +1,7 @@
 version: "0.1-beta"
 
 routing:
-  model: gpt-4o
+  model: archgw-v1-router-model
 
 listeners:
   egress_traffic:
@@ -14,7 +14,7 @@ llm_providers:
 
   - name: archgw-v1-router-model
     provider_interface: openai
-    model: cotran2/llama-4-epoch
+    model: cotran2/qwen-4-epoch-2600
     base_url: http://34.46.85.85:8000/v1
 
   - name: gpt-4o

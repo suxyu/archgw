@@ -12,10 +12,15 @@ pub fn token_count(model_name: &str, text: &str) -> Result<usize, String> {
                 "tiktoken_rs: unsupported model: {}, using gpt-4 to compute token count",
                 model_name
             );
-
             "gpt-4"
         }
-        true => model_name,
+        true => {
+            if model_name.starts_with("gpt-4.1") {
+                "gpt-4o"
+            } else {
+                model_name
+            }
+        }
     };
 
     // Consideration: is it more expensive to instantiate the BPE object every time, or to contend the singleton?
