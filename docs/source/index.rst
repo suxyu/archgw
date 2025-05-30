@@ -52,6 +52,7 @@ Welcome to Arch!
       guides/prompt_guard
       guides/agent_routing
       guides/function_calling
+      guides/llm_router
       guides/observability/observability
 
   .. tab-item:: Build with Arch
