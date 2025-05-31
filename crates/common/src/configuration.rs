@@ -173,6 +173,25 @@ impl Display for LlmProviderType {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LlmRoute {
+    pub name: String,
+    pub description: String,
+}
+
+impl From<&LlmProvider> for LlmRoute {
+    fn from(provider: &LlmProvider) -> Self {
+        Self {
+            name: provider.name.to_string(),
+            description: provider
+                .usage
+                .as_ref()
+                .cloned()
+                .unwrap_or_else(|| "No description available".to_string()),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 //TODO: use enum for model, but if there is a new model, we need to update the code
 pub struct LlmProvider {
     pub name: String,

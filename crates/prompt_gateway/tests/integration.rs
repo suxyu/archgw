@@ -1,5 +1,6 @@
 use common::api::open_ai::{
-    ChatCompletionsResponse, Choice, ContentType, FunctionCallDetail, Message, ToolCall, ToolType, Usage
+    ChatCompletionsResponse, Choice, ContentType, FunctionCallDetail, Message, ToolCall, ToolType,
+    Usage,
 };
 use common::configuration::Configuration;
 use http::StatusCode;

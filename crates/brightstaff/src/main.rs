@@ -101,20 +101,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                             .with_context(parent_cx)
                             .await
                     }
-                    (&Method::GET, "/v1/models") => {
-                        Ok(list_models(llm_providers).await)
-                    }
+                    (&Method::GET, "/v1/models") => Ok(list_models(llm_providers).await),
                     (&Method::OPTIONS, "/v1/models") => {
                         let mut response = Response::new(empty());
                         *response.status_mut() = StatusCode::NO_CONTENT;
-                        response.headers_mut().insert(
-                            "Allow",
-                            "GET, OPTIONS".parse().unwrap(),
-                        );
-                        response.headers_mut().insert(
-                            "Access-Control-Allow-Origin",
-                            "*".parse().unwrap(),
-                        );
+                        response
+                            .headers_mut()
+                            .insert("Allow", "GET, OPTIONS".parse().unwrap());
+                        response
+                            .headers_mut()
+                            .insert("Access-Control-Allow-Origin", "*".parse().unwrap());
                         response.headers_mut().insert(
                             "Access-Control-Allow-Headers",
                             "Authorization, Content-Type".parse().unwrap(),
@@ -123,10 +119,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                             "Access-Control-Allow-Methods",
                             "GET, POST, OPTIONS".parse().unwrap(),
                         );
-                        response.headers_mut().insert(
-                            "Content-Type",
-                            "application/json".parse().unwrap(),
-                        );
+                        response
+                            .headers_mut()
+                            .insert("Content-Type", "application/json".parse().unwrap());
 
                         Ok(response)
                     }

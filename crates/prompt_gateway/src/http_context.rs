@@ -237,9 +237,7 @@ impl HttpContext for StreamContext {
             Duration::from_secs(5),
         );
 
-        if let Some(content) =
-            self.user_prompt.as_ref().unwrap().content.as_ref()
-        {
+        if let Some(content) = self.user_prompt.as_ref().unwrap().content.as_ref() {
             let call_context = StreamCallContext {
                 response_handler_type: ResponseHandlerType::ArchFC,
                 user_message: Some(content.to_string()),
@@ -262,7 +260,6 @@ impl HttpContext for StreamContext {
             );
         }
         Action::Pause
-
     }
 
     fn on_http_response_headers(&mut self, _num_headers: usize, _end_of_stream: bool) -> Action {

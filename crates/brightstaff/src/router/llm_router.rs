@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use common::{
     api::open_ai::{ChatCompletionsResponse, ContentType, Message},
-    configuration::LlmProvider,
+    configuration::{LlmProvider, LlmRoute},
     consts::ARCH_PROVIDER_HINT_HEADER,
 };
 use hyper::header;
@@ -47,26 +47,10 @@ impl RouterService {
             .cloned()
             .collect::<Vec<LlmProvider>>();
 
-        // convert the llm_providers to yaml string but only include name and usage
-        let llm_providers_with_usage_yaml = providers_with_usage
-            .iter()
-            .map(|provider| {
-                format!(
-                    "- name: {}\n  description: {}",
-                    provider.name,
-                    provider.usage.as_ref().unwrap_or(&"".to_string())
-                )
-            })
-            .collect::<Vec<String>>()
-            .join("\n");
-
-        debug!(
-            "llm_providers from config with usage: {}...",
-            llm_providers_with_usage_yaml.replace("\n", "\\n")
-        );
+        let llm_routes: Vec<LlmRoute> = providers_with_usage.iter().map(LlmRoute::from).collect();
 
         let router_model = Arc::new(router_model_v1::RouterModelV1::new(
-            llm_providers_with_usage_yaml.clone(),
+            llm_routes,
             routing_model_name.clone(),
             router_model_v1::MAX_TOKEN_LEN,
         ));

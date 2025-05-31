@@ -162,6 +162,8 @@ pub struct StreamOptions {
 pub enum MultiPartContentType {
     #[serde(rename = "text")]
     Text,
+    #[serde(rename = "image_url")]
+    ImageUrl,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -188,6 +190,9 @@ impl Display for ContentType {
                     .filter_map(|part| {
                         if part.content_type == MultiPartContentType::Text {
                             part.text.clone()
+                        } else if part.content_type == MultiPartContentType::ImageUrl {
+                            // skip image URLs or their data in text representation
+                            None
                         } else {
                             panic!("Unsupported content type: {:?}", part.content_type);
                         }
@@ -215,6 +220,19 @@ pub struct Message {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tool_call_id: Option<String>,
+}
+
+impl Message {
+    pub fn new(role: String, content: String) -> Self {
+        let content = Some(ContentType::Text(content));
+        Message {
+            role,
+            content,
+            model: None,
+            tool_calls: None,
+            tool_call_id: None,
+        }
+    }
 }
 
 impl Default for Message {

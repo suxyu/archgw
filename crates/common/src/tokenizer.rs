@@ -14,13 +14,7 @@ pub fn token_count(model_name: &str, text: &str) -> Result<usize, String> {
             );
             "gpt-4"
         }
-        true => {
-            if model_name.starts_with("gpt-4.1") {
-                "gpt-4o"
-            } else {
-                model_name
-            }
-        }
+        true => model_name
     };
 
     // Consideration: is it more expensive to instantiate the BPE object every time, or to contend the singleton?
