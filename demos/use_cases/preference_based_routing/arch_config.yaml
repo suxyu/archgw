@@ -13,7 +13,7 @@ listeners:
 llm_providers:
 
   - name: arch-router
-    access_key: $OPENAI_API_KEY
+    access_key: $ARCH_API_KEY
     provider_interface: arch
     model: Arch-Router
 
