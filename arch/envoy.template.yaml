@@ -472,6 +472,31 @@ static_resources:
 
   clusters:
 
+    - name: arch
+      connect_timeout: 0.5s
+      type: LOGICAL_DNS
+      dns_lookup_family: V4_ONLY
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: arch
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: archfc.katanemo.dev
+                      port_value: 443
+                  hostname: "archfc.katanemo.dev"
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          sni: archfc.katanemo.dev
+          common_tls_context:
+            tls_params:
+              tls_minimum_protocol_version: TLSv1_2
+              tls_maximum_protocol_version: TLSv1_3
+
     - name: claude
       connect_timeout: 0.5s
       type: LOGICAL_DNS
@@ -751,22 +776,6 @@ static_resources:
                       address: 0.0.0.0
                       port_value: 9091
                   hostname: localhost
-
-    - name: router_model_host
-      connect_timeout: 0.5s
-      type: LOGICAL_DNS
-      dns_lookup_family: V4_ONLY
-      lb_policy: ROUND_ROBIN
-      load_assignment:
-        cluster_name: router_model_host
-        endpoints:
-          - lb_endpoints:
-              - endpoint:
-                  address:
-                    socket_address:
-                      address: 34.30.16.38
-                      port_value: 8000
-                  hostname: router_model_host
 
     - name: arch_prompt_gateway_listener
       connect_timeout: 0.5s

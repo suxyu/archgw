@@ -120,6 +120,11 @@ impl RouterService {
             );
         }
 
+        llm_route_request_headers.insert(
+            header::HeaderName::from_static("model"),
+            header::HeaderValue::from_static("arch-router"),
+        );
+
         let start_time = std::time::Instant::now();
         let res = self
             .client

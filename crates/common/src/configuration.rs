@@ -145,6 +145,8 @@ pub struct EmbeddingProviver {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum LlmProviderType {
+    #[serde(rename = "arch")]
+    Arch,
     #[serde(rename = "claude")]
     Claude,
     #[serde(rename = "deepseek")]
@@ -160,6 +162,7 @@ pub enum LlmProviderType {
 impl Display for LlmProviderType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            LlmProviderType::Arch => write!(f, "arch"),
             LlmProviderType::Claude => write!(f, "claude"),
             LlmProviderType::Deepseek => write!(f, "deepseek"),
             LlmProviderType::Groq => write!(f, "groq"),
