@@ -23,7 +23,13 @@ do
   echo "starting archgw"
   archgw up arch_config.yaml
   echo "starting docker containers"
-  docker compose up -d 2>&1 > /dev/null
+  # only execute docker compose if demo is use_cases/preference_based_routing
+  if [ "$demo" == "use_cases/preference_based_routing" ]; then
+    echo "starting docker compose for $demo"
+    docker compose -f docker-compose.yaml up -d 2>&1 > /dev/null
+  else
+    echo "skipping docker compose for $demo"
+  fi
   echo "starting hurl tests"
   if ! hurl hurl_tests/*.hurl; then
     echo "Hurl tests failed for $demo"
