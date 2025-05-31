@@ -3,6 +3,10 @@ type: object
 properties:
   version:
     type: string
+    enum:
+      - v0.1
+      - v0.1.0
+      - 0.1-beta
   listeners:
     type: object
     additionalProperties: false

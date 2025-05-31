@@ -40,7 +40,7 @@ Create ``arch_config.yaml`` file with the following content:
 
 .. code-block:: yaml
 
-   version: v0.1
+   version: v0.1.0
 
   listeners:
     ingress_traffic:
@@ -143,7 +143,7 @@ Create ``arch_config.yaml`` file with the following content:
 
 .. code-block:: yaml
 
-   version: v0.1
+   version: v0.1.0
 
   listeners:
     egress_traffic:

@@ -93,7 +93,7 @@ In following quickstart we will show you how easy it is to build AI agent with A
 Create `arch_config.yaml` file with following content,
 
 ```yaml
-version: v0.1
+version: v0.1.0
 
 listeners:
   ingress_traffic:
@@ -195,7 +195,7 @@ Arch operates based on a configuration file where you can define LLM providers, 
 Create `arch_config.yaml` file with following content:
 
 ```yaml
-version: v0.1
+version: v0.1.0
 
 listeners:
   egress_traffic:
