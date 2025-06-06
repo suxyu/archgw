@@ -343,6 +343,13 @@ static_resources:
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.compressor.v3.Compressor
                       compressor_library:
+                        name: envoy.compression.brotli.compressor
+                        typed_config:
+                          "@type": type.googleapis.com/envoy.extensions.compression.brotli.compressor.v3.Brotli
+                  - name: envoy.filters.http.compressor
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.compressor.v3.Compressor
+                      compressor_library:
                         name: compress
                         typed_config:
                           "@type": type.googleapis.com/envoy.extensions.compression.gzip.compressor.v3.Gzip
@@ -359,6 +366,13 @@ static_resources:
                           chunk_size: 8192
                           # If this ratio is set too low, then body data will not be decompressed completely.
                           max_inflate_ratio: 1000
+                  - name: envoy.filters.http.decompressor
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.decompressor.v3.Decompressor
+                      decompressor_library:
+                        name: envoy.compression.brotli.decompressor
+                        typed_config:
+                          "@type": type.googleapis.com/envoy.extensions.compression.brotli.decompressor.v3.Brotli
                   - name: envoy.filters.http.router
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
@@ -433,6 +447,13 @@ static_resources:
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.compressor.v3.Compressor
                       compressor_library:
+                        name: envoy.compression.brotli.compressor
+                        typed_config:
+                          "@type": type.googleapis.com/envoy.extensions.compression.brotli.compressor.v3.Brotli
+                  - name: envoy.filters.http.compressor
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.compressor.v3.Compressor
+                      compressor_library:
                         name: compress
                         typed_config:
                           "@type": type.googleapis.com/envoy.extensions.compression.gzip.compressor.v3.Gzip
@@ -466,6 +487,13 @@ static_resources:
                           chunk_size: 8192
                           # If this ratio is set too low, then body data will not be decompressed completely.
                           max_inflate_ratio: 1000
+                  - name: envoy.filters.http.decompressor
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.decompressor.v3.Decompressor
+                      decompressor_library:
+                        name: envoy.compression.brotli.decompressor
+                        typed_config:
+                          "@type": type.googleapis.com/envoy.extensions.compression.brotli.decompressor.v3.Brotli
                   - name: envoy.filters.http.router
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
