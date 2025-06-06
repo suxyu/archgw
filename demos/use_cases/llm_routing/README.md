@@ -19,7 +19,7 @@ You can also pass in a header to override model when sending prompt. Following e
 
 $ curl --header 'Content-Type: application/json' \
   --header 'x-arch-llm-provider-hint: ministral-3b' \
-  --data '{"messages": [{"role": "user","content": "hello"}]}' \
+  --data '{"messages": [{"role": "user","content": "hello"}], "model": "none"}' \
   http://localhost:12000/v1/chat/completions 2> /dev/null | jq .
 {
   "id": "xxx",
@@ -29,7 +29,7 @@ $ curl --header 'Content-Type: application/json' \
   "choices": [
     {
       "index": 0,
-      "message": {
+      "messages": {
         "role": "assistant",
         "tool_calls": null,
         "content": "Hello! How can I assist you today? Let's chat about anything you'd like. 😊"

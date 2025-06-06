@@ -168,7 +168,7 @@ Here is a sample curl command you can use to interact,
 
 ```bash
 $ curl --header 'Content-Type: application/json' \
-  --data '{"messages": [{"role": "user","content": "what is exchange rate for gbp"}]}' \
+  --data '{"messages": [{"role": "user","content": "what is exchange rate for gbp"}], "model": "none"}' \
   http://localhost:10000/v1/chat/completions | jq ".choices[0].message.content"
 
 "As of the date provided in your context, December 5, 2024, the exchange rate for GBP (British Pound) from USD (United States Dollar) is 0.78558. This means that 1 USD is equivalent to 0.78558 GBP."
@@ -179,7 +179,7 @@ And to get list of supported currencies,
 
 ```bash
 $ curl --header 'Content-Type: application/json' \
-  --data '{"messages": [{"role": "user","content": "show me list of currencies that are supported for conversion"}]}' \
+  --data '{"messages": [{"role": "user","content": "show me list of currencies that are supported for conversion"}], "model": "none"}' \
   http://localhost:10000/v1/chat/completions | jq ".choices[0].message.content"
 
 "Here is a list of the currencies that are supported for conversion from USD, along with their symbols:\n\n1. AUD - Australian Dollar\n2. BGN - Bulgarian Lev\n3. BRL - Brazilian Real\n4. CAD - Canadian Dollar\n5. CHF - Swiss Franc\n6. CNY - Chinese Renminbi Yuan\n7. CZK - Czech Koruna\n8. DKK - Danish Krone\n9. EUR - Euro\n10. GBP - British Pound\n11. HKD - Hong Kong Dollar\n12. HUF - Hungarian Forint\n13. IDR - Indonesian Rupiah\n14. ILS - Israeli New Sheqel\n15. INR - Indian Rupee\n16. ISK - Icelandic Króna\n17. JPY - Japanese Yen\n18. KRW - South Korean Won\n19. MXN - Mexican Peso\n20. MYR - Malaysian Ringgit\n21. NOK - Norwegian Krone\n22. NZD - New Zealand Dollar\n23. PHP - Philippine Peso\n24. PLN - Polish Złoty\n25. RON - Romanian Leu\n26. SEK - Swedish Krona\n27. SGD - Singapore Dollar\n28. THB - Thai Baht\n29. TRY - Turkish Lira\n30. USD - United States Dollar\n31. ZAR - South African Rand\n\nIf you want to convert USD to any of these currencies, you can select the one you are interested in."
@@ -262,7 +262,7 @@ print("OpenAI Response:", response.choices[0].message.content)
 #### Step 3.2: Using curl command
 ```
 $ curl --header 'Content-Type: application/json' \
-  --data '{"messages": [{"role": "user","content": "What is the capital of France?"}]}' \
+  --data '{"messages": [{"role": "user","content": "What is the capital of France?"}], "model": "none"}' \
   http://localhost:12000/v1/chat/completions
 
 {
@@ -271,7 +271,7 @@ $ curl --header 'Content-Type: application/json' \
   "choices": [
     {
       ...
-      "message": {
+      "messages": {
         "role": "assistant",
         "content": "The capital of France is Paris.",
       },
@@ -287,14 +287,14 @@ You can override model selection using `x-arch-llm-provider-hint` header. For ex
 ```
 $ curl --header 'Content-Type: application/json' \
   --header 'x-arch-llm-provider-hint: ministral-3b' \
-  --data '{"messages": [{"role": "user","content": "What is the capital of France?"}]}' \
+  --data '{"messages": [{"role": "user","content": "What is the capital of France?"}], "model": "none"}' \
   http://localhost:12000/v1/chat/completions
 {
   ...
   "model": "ministral-3b-latest",
   "choices": [
     {
-      "message": {
+      "messages": {
         "role": "assistant",
         "content": "The capital of France is Paris. It is the most populous city in France and is known for its iconic landmarks such as the Eiffel Tower, the Louvre Museum, and Notre-Dame Cathedral. Paris is also a major global center for art, fashion, gastronomy, and culture.",
       },
