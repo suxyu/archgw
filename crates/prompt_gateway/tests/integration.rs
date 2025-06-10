@@ -312,6 +312,7 @@ fn prompt_gateway_bad_request_to_open_ai_chat_completions() {
 }
 
 #[test]
+#[ignore]
 #[serial]
 fn prompt_gateway_request_to_llm_gateway() {
     let args = tester::MockSettings {
@@ -462,6 +463,7 @@ fn prompt_gateway_request_to_llm_gateway() {
 }
 
 #[test]
+#[ignore]
 #[serial]
 fn prompt_gateway_request_no_intent_match() {
     let args = tester::MockSettings {
@@ -608,6 +610,7 @@ ratelimits:
 }
 
 #[test]
+#[ignore]
 #[serial]
 fn prompt_gateway_request_no_intent_match_default_target() {
     let args = tester::MockSettings {

@@ -329,7 +329,7 @@ $ archgw up --service archgw --foreground
 ...
 ```
 
-Log level can be changed to debug to get more details. To enable debug logs edit (Dockerfile)[arch/Dockerfile], change the log level `--component-log-level wasm:info` to `--component-log-level wasm:debug`. And after that you need to rebuild docker image and restart the arch gateway using following set of commands,
+Log level can be changed to debug to get more details. To enable debug logs edit (supervisord.conf)[arch/supervisord.conf], change the log level `--component-log-level wasm:info` to `--component-log-level wasm:debug`. And after that you need to rebuild docker image and restart the arch gateway using following set of commands,
 
 ```
 # make sure you are at the root of the repo

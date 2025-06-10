@@ -202,20 +202,7 @@ fn llm_gateway_successful_request_to_open_ai_chat_completions() {
     request_headers_expectations(&mut module, http_context);
 
     // Request Body
-    let chat_completions_request_body = "\
-    {\
-        \"messages\": [\
-        {\
-            \"role\": \"system\",\
-            \"content\": \"You are a poetic assistant, skilled in explaining complex programming concepts with creative flair.\"\
-        },\
-        {\
-            \"role\": \"user\",\
-            \"content\": \"Compose a poem.\"\
-        }\
-        ],\
-        \"model\": \"gpt-4\"\
-    }";
+    let chat_completions_request_body = r#"{"model":"gpt-4","messages":[{"role":"system","content":"You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."},{"role":"user","content":"Compose a poem."}]}"#;
 
     module
         .call_proxy_on_request_body(
@@ -227,7 +214,6 @@ fn llm_gateway_successful_request_to_open_ai_chat_completions() {
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(chat_completions_request_body))
         .expect_log(Some(LogLevel::Info), None)
-        .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Debug), None)
         .expect_metric_record("input_sequence_length", 21)
@@ -268,18 +254,7 @@ fn llm_gateway_bad_request_to_open_ai_chat_completions() {
     request_headers_expectations(&mut module, http_context);
 
     // Request Body
-    let incomplete_chat_completions_request_body = "\
-    {\
-        \"messages\": [\
-        {\
-            \"role\": \"system\"\
-        },\
-        {\
-            \"role\": \"user\",\
-            \"content\": \"Compose a poem that explains the concept of recursion in programming.\"\
-        }\
-        ]\
-    }";
+    let incomplete_chat_completions_request_body = r#"{"model":"gpt-1","messages":[{"role":"system","content":"Compose a poem that explains the concept of recursion in programming."}]}"#;
 
     module
         .call_proxy_on_request_body(
@@ -290,7 +265,7 @@ fn llm_gateway_bad_request_to_open_ai_chat_completions() {
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(incomplete_chat_completions_request_body))
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Info), Some("on_http_request_body: provider: open-ai-gpt-4, model requested: , model selected: gpt-4"))
+        .expect_log(Some(LogLevel::Info), Some("on_http_request_body: provider: open-ai-gpt-4, model requested: gpt-1, model selected: gpt-4"))
         .expect_send_local_response(
             Some(StatusCode::BAD_REQUEST.as_u16().into()),
             None,
@@ -300,8 +275,7 @@ fn llm_gateway_bad_request_to_open_ai_chat_completions() {
         .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_metric_record("input_sequence_length", 14)
-        .expect_log(Some(LogLevel::Debug), None)
+        .expect_metric_record("input_sequence_length", 13)
         .expect_log(Some(LogLevel::Debug), None)
         .execute_and_expect(ReturnType::Action(Action::Continue))
         .unwrap();
@@ -359,11 +333,10 @@ fn llm_gateway_request_ratelimited() {
         .expect_log(Some(LogLevel::Info), None)
         .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Debug), None)
         .expect_metric_record("input_sequence_length", 107)
+        .expect_log(Some(LogLevel::Debug), Some("Applying ratelimit for model: gpt-4"))
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Warn), Some("server error occurred: exceeded limit provider=gpt-4, selector=Header { key: \"selector-key\", value: \"selector-value\" }, tokens_used=107"))
+        .expect_log(Some(LogLevel::Warn), Some(r#"server error occurred: exceeded limit provider=gpt-4, selector=Header { key: "selector-key", value: "selector-value" }, tokens_used=107"#))
         .expect_send_local_response(
             Some(StatusCode::TOO_MANY_REQUESTS.as_u16().into()),
             None,
@@ -399,20 +372,7 @@ fn llm_gateway_request_not_ratelimited() {
     normal_flow(&mut module, filter_context, http_context);
 
     // give shorter body to avoid rate limiting
-    let chat_completions_request_body = "\
-{\
-    \"messages\": [\
-    {\
-        \"role\": \"system\",\
-        \"content\": \"You are a poetic assistant, skilled in explaining complex programming concepts with creative flair.\"\
-    },\
-    {\
-        \"role\": \"user\",\
-        \"content\": \"Compose a poem that explains the concept of recursion in programming.\"\
-    }\
-    ],\
-    \"model\": \"gpt-4\"\
-}";
+    let chat_completions_request_body = r#"{"model":"gpt-1","messages":[{"role":"system","content":"You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."},{"role":"user","content":"Compose a poem that explains the concept of recursion in programming."}]}"#;
 
     module
         .call_proxy_on_request_body(
@@ -425,7 +385,6 @@ fn llm_gateway_request_not_ratelimited() {
         .returning(Some(chat_completions_request_body))
         // The actual call is not important in this test, we just need to grab the token_id
         .expect_log(Some(LogLevel::Info), None)
-        .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Debug), None)
         .expect_metric_record("input_sequence_length", 29)
@@ -460,20 +419,7 @@ fn llm_gateway_override_model_name() {
     normal_flow(&mut module, filter_context, http_context);
 
     // give shorter body to avoid rate limiting
-    let chat_completions_request_body = "\
-{\
-    \"model\": \"o1-mini\",\
-    \"messages\": [\
-    {\
-        \"role\": \"system\",\
-        \"content\": \"You are a poetic assistant, skilled in explaining complex programming concepts with creative flair.\"\
-    },\
-    {\
-        \"role\": \"user\",\
-        \"content\": \"Compose a poem that explains the concept of recursion in programming.\"\
-    }\
-    ]
-}";
+    let chat_completions_request_body = r#"{"model":"gpt-1","messages":[{"role":"system","content":"You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."},{"role":"user","content":"Compose a poem that explains the concept of recursion in programming."}]}"#;
 
     module
         .call_proxy_on_request_body(
@@ -485,8 +431,7 @@ fn llm_gateway_override_model_name() {
         .returning(Some(chat_completions_request_body))
         // The actual call is not important in this test, we just need to grab the token_id
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Info), Some("on_http_request_body: provider: open-ai-gpt-4, model requested: o1-mini, model selected: gpt-4"))
-        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Info), Some("on_http_request_body: provider: open-ai-gpt-4, model requested: gpt-1, model selected: gpt-4"))
         .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Debug), None)
         .expect_metric_record("input_sequence_length", 29)
@@ -521,19 +466,7 @@ fn llm_gateway_override_use_default_model() {
     normal_flow(&mut module, filter_context, http_context);
 
     // give shorter body to avoid rate limiting
-    let chat_completions_request_body = "\
-{\
-    \"messages\": [\
-    {\
-        \"role\": \"system\",\
-        \"content\": \"You are a poetic assistant, skilled in explaining complex programming concepts with creative flair.\"\
-    },\
-    {\
-        \"role\": \"user\",\
-        \"content\": \"Compose a poem that explains the concept of recursion in programming.\"\
-    }\
-    ]
-}";
+    let chat_completions_request_body = r#"{"model":"gpt-1","messages":[{"role":"system","content":"You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."},{"role":"user","content":"Compose a poem that explains the concept of recursion in programming."}]}"#;
 
     module
         .call_proxy_on_request_body(
@@ -547,14 +480,13 @@ fn llm_gateway_override_use_default_model() {
         // The actual call is not important in this test, we just need to grab the token_id
         .expect_log(
             Some(LogLevel::Info),
-            Some("on_http_request_body: provider: open-ai-gpt-4, model requested: , model selected: gpt-4"),
+            Some("on_http_request_body: provider: open-ai-gpt-4, model requested: gpt-1, model selected: gpt-4"),
         )
         .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Debug), None)
         .expect_metric_record("input_sequence_length", 29)
-        .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), Some("Applying ratelimit for model: gpt-4"))
+        .expect_log(Some(LogLevel::Debug), Some(r#"Checking limit for provider=gpt-4, with selector=Header { key: "selector-key", value: "selector-value" }, consuming tokens=29"#))
         .expect_set_buffer_bytes(Some(BufferType::HttpRequestBody), None)
         .execute_and_expect(ReturnType::Action(Action::Continue))
         .unwrap();
@@ -584,20 +516,7 @@ fn llm_gateway_override_use_model_name_none() {
     normal_flow(&mut module, filter_context, http_context);
 
     // give shorter body to avoid rate limiting
-    let chat_completions_request_body = "\
-{\
-    \"model\": \"none\",\
-    \"messages\": [\
-    {\
-        \"role\": \"system\",\
-        \"content\": \"You are a poetic assistant, skilled in explaining complex programming concepts with creative flair.\"\
-    },\
-    {\
-        \"role\": \"user\",\
-        \"content\": \"Compose a poem that explains the concept of recursion in programming.\"\
-    }\
-    ]
-}";
+    let chat_completions_request_body = r#"{"model":"none","messages":[{"role":"system","content":"You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."},{"role":"user","content":"Compose a poem that explains the concept of recursion in programming."}]}"#;
 
     module
         .call_proxy_on_request_body(
@@ -613,7 +532,6 @@ fn llm_gateway_override_use_model_name_none() {
         .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Debug), None)
         .expect_metric_record("input_sequence_length", 29)
-        .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Debug), None)
         .expect_set_buffer_bytes(Some(BufferType::HttpRequestBody), None)

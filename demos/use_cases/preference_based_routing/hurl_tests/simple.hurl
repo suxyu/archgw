@@ -5,9 +5,10 @@ Content-Type: application/json
   "messages": [
     {
       "role": "user",
-      "content": "I am running under debt, how should I keep a tab on my expenses?"
+      "content": "hi"
     }
-  ]
+  ],
+  "model": "none"
 }
 HTTP 200
 [Asserts]

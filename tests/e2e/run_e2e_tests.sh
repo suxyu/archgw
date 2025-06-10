@@ -24,7 +24,7 @@ trap 'print_debug' INT TERM ERR
 
 log starting > ../build.log
 
-log building and running function_callling demo
+log building and running function_calling demo
 log ===========================================
 cd ../../demos/samples_python/weather_forecast/
 docker compose up weather_forecast_service --build -d
