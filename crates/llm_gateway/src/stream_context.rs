@@ -90,13 +90,26 @@ impl StreamContext {
             provider_hint,
         ));
 
-        if self.llm_provider.as_ref().unwrap().provider_interface == LlmProviderType::Groq {
-            if let Some(path) = self.get_http_request_header(":path") {
-                if path.starts_with("/v1/") {
-                    let new_path = format!("/openai{}", path);
-                    self.set_http_request_header(":path", Some(new_path.as_str()));
+        match self.llm_provider.as_ref().unwrap().provider_interface {
+            LlmProviderType::Groq => {
+                if let Some(path) = self.get_http_request_header(":path") {
+                    if path.starts_with("/v1/") {
+                        let new_path = format!("/openai{}", path);
+                        self.set_http_request_header(":path", Some(new_path.as_str()));
+                    }
                 }
             }
+            LlmProviderType::Gemini => {
+                if let Some(path) = self.get_http_request_header(":path") {
+                    if path == "/v1/chat/completions" {
+                        self.set_http_request_header(
+                            ":path",
+                            Some("/v1beta/openai/chat/completions"),
+                        );
+                    }
+                }
+            }
+            _ => {}
         }
 
         debug!(
@@ -202,6 +215,8 @@ impl HttpContext for StreamContext {
             return Action::Continue;
         }
 
+        self.is_chat_completions_request = CHAT_COMPLETIONS_PATH == request_path;
+
         let use_agent_orchestrator = match self.overrides.as_ref() {
             Some(overrides) => overrides.use_agent_orchestrator.unwrap_or_default(),
             None => false,
@@ -241,9 +256,6 @@ impl HttpContext for StreamContext {
 
         self.delete_content_length_header();
         self.save_ratelimit_header();
-
-        let request_path = self.get_http_request_header(":path").unwrap_or_default();
-        self.is_chat_completions_request = CHAT_COMPLETIONS_PATH.contains(&request_path.as_str());
 
         self.request_id = self.get_http_request_header(REQUEST_ID_HEADER);
         self.traceparent = self.get_http_request_header(TRACE_PARENT_HEADER);
@@ -392,10 +404,10 @@ impl HttpContext for StreamContext {
         Action::Continue
     }
 
-    fn on_http_response_headers(&mut self, _num_headers: usize, _end_of_stream: bool) -> Action {
+    fn on_http_response_headers(&mut self, _num_headers: usize, end_of_stream: bool) -> Action {
         debug!(
             "on_http_response_headers [S={}] end_stream={}",
-            self.context_id, _end_of_stream
+            self.context_id, end_of_stream
         );
 
         self.set_property(
@@ -541,6 +553,13 @@ impl HttpContext for StreamContext {
                 }
             }
         };
+
+        if log::log_enabled!(log::Level::Debug) {
+            debug!(
+                "response data (converted to utf8): {}",
+                String::from_utf8_lossy(&body)
+            );
+        }
 
         let llm_provider_str = self.llm_provider().provider_interface.to_string();
         let hermes_llm_provider = Provider::from(llm_provider_str.as_str());

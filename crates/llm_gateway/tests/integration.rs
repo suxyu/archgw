@@ -54,8 +54,6 @@ fn request_headers_expectations(module: &mut Tester, http_context: i32) {
         .returning(Some("selector-key"))
         .expect_get_header_map_value(Some(MapType::HttpRequestHeaders), Some("selector-key"))
         .returning(Some("selector-value"))
-        .expect_get_header_map_value(Some(MapType::HttpRequestHeaders), Some(":path"))
-        .returning(Some("/v1/chat/completions"))
         .expect_get_header_map_value(Some(MapType::HttpRequestHeaders), Some("x-request-id"))
         .returning(None)
         .expect_get_header_map_value(Some(MapType::HttpRequestHeaders), Some("traceparent"))

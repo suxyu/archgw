@@ -80,6 +80,7 @@ properties:
             - groq
             - mistral
             - openai
+            - gemini
         access_key:
           type: string
         model:

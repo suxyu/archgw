@@ -45,5 +45,10 @@ llm_providers:
     provider_interface: groq
     model: llama-3.1-8b-instant
 
+  - name: gemini
+    access_key: $GEMINI_API_KEY
+    provider_interface: gemini
+    model: gemini-1.5-pro-latest
+
 tracing:
   random_sampling: 100

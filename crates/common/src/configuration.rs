@@ -158,6 +158,8 @@ pub enum LlmProviderType {
     Mistral,
     #[serde(rename = "openai")]
     OpenAI,
+    #[serde(rename = "gemini")]
+    Gemini,
 }
 
 impl Display for LlmProviderType {
@@ -167,6 +169,7 @@ impl Display for LlmProviderType {
             LlmProviderType::Claude => write!(f, "claude"),
             LlmProviderType::Deepseek => write!(f, "deepseek"),
             LlmProviderType::Groq => write!(f, "groq"),
+            LlmProviderType::Gemini => write!(f, "gemini"),
             LlmProviderType::Mistral => write!(f, "mistral"),
             LlmProviderType::OpenAI => write!(f, "openai"),
         }
