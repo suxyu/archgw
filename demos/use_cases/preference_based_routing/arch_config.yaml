@@ -22,17 +22,17 @@ llm_providers:
     access_key: $OPENAI_API_KEY
     model: gpt-4o-mini
 
-  - name: gpt-4o
+  - name: gpt-4.1
     provider_interface: openai
     access_key: $OPENAI_API_KEY
-    model: gpt-4o
+    model: gpt-4.1
     default: true
 
   - name: code_generation
-    provider_interface: openai
     access_key: $OPENAI_API_KEY
-    model: gpt-4o
-    usage: Generating new code snippets, functions, or boilerplate based on user prompts or requirements
+    provider_interface: claude
+    model: gpt-4.1
+    usage: generating new code snippets, functions, or boilerplate based on user prompts or requirements
 
   - name: code_understanding
     provider_interface: openai

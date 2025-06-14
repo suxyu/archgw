@@ -6,15 +6,21 @@ pub fn token_count(model_name: &str, text: &str) -> Result<usize, String> {
     //HACK: add support for tokenizing mistral and other models
     //filed issue https://github.com/katanemo/arch/issues/222
 
-    let updated_model = match model_name.starts_with("gpt") {
+    let updated_model = match model_name.starts_with("gpt-4") {
         false => {
             debug!(
                 "tiktoken_rs: unsupported model: {}, using gpt-4 to compute token count",
                 model_name
             );
-            "gpt-4"
+            "gpt-4o"
         }
-        true => model_name,
+        true => {
+            if model_name.starts_with("gpt-4.1") {
+                "gpt-4o"
+            } else {
+                model_name
+            }
+        }
     };
 
     // Consideration: is it more expensive to instantiate the BPE object every time, or to contend the singleton?

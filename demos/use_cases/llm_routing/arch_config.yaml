@@ -26,12 +26,12 @@ llm_providers:
     model: ministral-3b-latest
 
   - name: claude-sonnet
-    access_key: $ANTHROPY_API_KEY
+    access_key: $ANTHROPIC_API_KEY
     provider_interface: claude
     model: claude-3-7-sonnet-latest
 
   - name: claude-sonnet-4
-    access_key: $ANTHROPY_API_KEY
+    access_key: $ANTHROPIC_API_KEY
     provider_interface: claude
     model: claude-sonnet-4-0
 
