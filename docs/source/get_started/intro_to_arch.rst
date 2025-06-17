@@ -2,18 +2,16 @@
 
 Intro to Arch
 =============
+AI demos are easy to build. But past the thrill of a quick hack, you are left building, maintaining and scaling low-level plumbing code for agents that slows down AI innovation.
+For example:
 
-Arch is an intelligent proxy server designed agentic applications. **Move faster** by letting Arch handle the **pesky heavy lifting** in building agents:
-fast input clarification, agent routing, seamless integration of prompts with tools for common tasks, and unified access and observability of LLMs.
+- You want to build specialized agents, but get stuck writing **routing and handoff** code.
+- You bogged down with prompt engineering work to **clarify user intent and validate inputs**.
+- You want to **quickly and safely use new LLMs** but get stuck writing integration code.
+- You waste cycles writing and maintaining **observability** code, when it can be transparent.
+- You want to **apply guardrails**, but have to write custom code for each prompt and LLM.
 
-Past the thrill of an AI demo, have you found yourself hitting these walls? You know, the all too familiar ones:
-
-- You break a prompt into specialized ones, but **get stuck writing routing** and handoff logic?
-- You want use new LLMs, but **struggle to quickly add LLMs** without writing integration logic?
-- You're **trapped in tedious prompting work** to clarify inputs and user intents?
-- You're **wasting cycles** choosing and integrating **code for observability** instead of it just happening transparently?
-
-And you think to yourself, can't I move faster by focusing on higher-level objectives in a language and framework agnostic way? Well, you can!
+Arch is designed to solve these problems by providing a unified, out-of-process architecture that integrates with your existing application stack, enabling you to focus on building high-level features rather than plumbing — all without locking you into a framework.
 
 .. figure:: /_static/img/arch_network_diagram_high_level.png
    :width: 100%
@@ -22,7 +20,7 @@ And you think to yourself, can't I move faster by focusing on higher-level objec
    High-level network flow of where Arch Gateway sits in your agentic stack. Designed for both ingress and egress prompt traffic.
 
 
-**Arch Gateway was built by the contributors of Envoy Proxy with the belief that:**
+Arch is an AI-native proxy server and the universal data plane for AI built by the contributors of Envoy Proxy with the belief that:
 
   *Prompts are nuanced and opaque user requests, which require the same capabilities as traditional HTTP requests
   including secure handling, intelligent routing, robust observability, and integration with backend (API)
@@ -41,8 +39,8 @@ This gives Arch several advantages:
 
 * Arch can be deployed and upgraded quickly across your infrastructure transparently without the horrid pain of deploying library upgrades in your applications.
 
-**Engineered with Fast LLMs:** Arch is engineered with specialized small LLMs that are designed for fast, cost-effective and accurate handling of prompts.
-These LLMs are designed to be best-in-class for critical prompt-related tasks like:
+**Engineered with Fast Task-Specific LLMs (TLMs):** Arch is engineered with specialized LLMs that are designed for the fast, cost-effective and accurate handling of prompts.
+These LLMs are designed to be best-in-class for critical tasks like:
 
 * **Function Calling:** Arch helps you easily personalize your applications by enabling calls to application-specific (API) operations via user prompts.
   This involves any predefined functions or APIs you want to expose to users to perform tasks, gather information, or manipulate data.

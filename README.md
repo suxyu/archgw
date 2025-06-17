@@ -4,8 +4,9 @@
 <div align="center">
 
 
-_The AI-native proxy server for agentic applications._<br><br>
-Arch handles the **pesky**, low-level details like routing user prompts to the right agents or specialized Model Context Protocol (MCP) tools, providing unified access and observability to large language models (LLMs), and quickly clarifying vague user inputs. With Arch, you build faster by focusing on the high-level logic of agents.
+_The AI-native proxy server and the universal data plane for AI agents._<br><br>
+Arch handles the *pesky low-level work* in building AI agents like clarifying vague user inputs, routing prompts to the right agents, calling tools for simple tasks, and unifying access to large language models (LLMs) - all without locking you into a framework. Move faster by focusing on the high-level logic of your agents.
+
 
 [Quickstart](#Quickstart) •
 [Demos](#Demos) •
@@ -25,14 +26,14 @@ Arch handles the **pesky**, low-level details like routing user prompts to the r
 # Overview
 <a href="https://www.producthunt.com/posts/arch-3?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-arch&#0045;3" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=565761&theme=dark&period=daily&t=1742359429995" alt="Arch - Build&#0032;fast&#0044;&#0032;hyper&#0045;personalized&#0032;agents&#0032;with&#0032;intelligent&#0032;infra | Product Hunt" style="width: 188px; height: 41px;" width="188" height="41" /></a>
 
-Past the thrill of an AI demo, have you found yourself hitting these walls? You know, the all too familiar ones:
+AI demos are easy to build. But past the thrill of a quick hack, you are left building, maintaining and scaling low-level plumbing code for agents that slows down AI innovation. For example:
 
-- You go from one BIG prompt to specialized prompts, but get stuck building **routing and handoff** code?
-- You want use new LLMs, but struggle to **quickly and safely add LLMs** without writing integration code?
-- You're bogged down with prompt engineering just to **clarify user intent and validate inputs** effectively?
-- You're wasting cycles choosing and integrating code for **observability** instead of it happening transparently?
+- You want to build specialized agents, but get stuck building **routing and handoff** code.
+- You want use new LLMs, but struggle to **quickly and safely add LLMs** without writing integration code.
+- You're bogged down with prompt engineering work to **clarify user intent and validate inputs**.
+- You're wasting cycles choosing and integrating code for **observability** instead of it happening transparently.
 
-And you think to yourself, can't I move faster by focusing on higher-level objectives in a language/framework agnostic way? Well, you can! **Arch Gateway** was built by the contributors of [Envoy Proxy](https://www.envoyproxy.io/) with the belief that:
+With Arch, you can move faster by focusing on higher-level objectives in a language and framework agnostic way. **Arch** was built by the contributors of [Envoy Proxy](https://www.envoyproxy.io/) with the belief that:
 
 >Prompts are nuanced and opaque user requests, which require the same capabilities as traditional HTTP requests including secure handling, intelligent routing, robust observability, and integration with backend (API) systems to improve speed and accuracy for common agentic scenarios  – all outside core application logic.*
 

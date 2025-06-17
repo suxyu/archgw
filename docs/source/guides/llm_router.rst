@@ -3,7 +3,12 @@
 LLM Routing
 ==============================================================
 
-LLM Router is an intelligent routing system that automatically selects the most appropriate large language model (LLM) for each user request based on the intent, domain, and complexity of the prompt. This enables optimal performance, cost efficiency, and response quality by matching requests with the most suitable model from your available LLM fleet.
+With the rapid proliferation of large language models (LLM) — each optimized for different strengths, style, or latency/cost profile — routing has become an essential technique to operationalize the use of different models.
+
+Arch Router is an intelligent routing system that automatically selects the most appropriate LLM for each user request based on user-defined usage preferences. Specifically Arch-Router guides model selection by matching queries to user-defined domains (e.g., finance and healthcare) and action types (e.g., code generation, image editing, etc.).
+Our preference-aligned approach matches practical definitions of performance in the real world and makes routing decisions more transparent and adaptable.
+
+This enables optimal performance, cost efficiency, and response quality by matching requests with the most suitable model from your available LLM fleet.
 
 
 Routing Workflow

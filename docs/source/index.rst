@@ -9,14 +9,14 @@ Welcome to Arch!
 
    <div style="text-align: center; font-size: 1.25rem;">
    <br>
-   <p>Build <strong>fast</strong>, <strong>observable</strong>, and <strong>personalized</strong> GenAI apps</p>
+   <p>Build <strong>faster</strong>, <strong>multi-LLM</strong> agents for the <strong>enterprise</strong>.</p>
    </div>
 
    <a href="https://www.producthunt.com/posts/arch-3?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-arch&#0045;3" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=565761&theme=dark&period=daily&t=1742433071161" alt="Arch - Build&#0032;fast&#0044;&#0032;hyper&#0045;personalized&#0032;agents&#0032;with&#0032;intelligent&#0032;infra | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 
-`Arch <https://github.com/katanemo/arch>`_ is an intelligent (edge and LLM) proxy, exclusively designed for prompts and agents - and built by the contributors of the widely adopted and loved `Envoy <https://www.envoyproxy.io/>`_ ).
+`Arch <https://github.com/katanemo/arch>`_ is an AI-native proxy server and the universal data plane for AI - one that is natively designed to handle and process AI prompts, not just network traffic.
 
-**Move faster** by letting Arch handle the **pesky heavy lifting** in building agents: fast input clarification, agent routing, seamless integration of prompts with tools for common tasks, and unified access and observability of LLMs - all outside business logic.
+Built by contributors to the widely adopted `Envoy Proxy <https://www.envoyproxy.io/>`_, Arch helps you move faster by handling the pesky *low-level* work in AI agent development—fast input clarification, intelligent agent routing, seamless prompt-to-tool integration, and unified LLM access and observability—all without locking you into a framework.
 
 .. tab-set::
 
