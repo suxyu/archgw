@@ -15,7 +15,8 @@ llm_providers:
   - name: arch-router
     access_key: $ARCH_API_KEY
     provider_interface: arch
-    model: Arch-Router
+    model: hf.co/katanemo/Arch-Router-1.5B.gguf:Q4_K_M
+    endpoint: host.docker.internal:11434
 
   - name: gpt-4o-mini
     provider_interface: openai

@@ -144,6 +144,7 @@ impl RouterModel for RouterModelV1 {
                 content: Some(ContentType::Text(messages_content)),
                 role: USER_ROLE.to_string(),
             }],
+            temperature: Some(0.01),
             ..Default::default()
         }
     }
