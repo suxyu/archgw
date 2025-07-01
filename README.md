@@ -11,7 +11,7 @@ Arch handles the *pesky low-level work* in building AI agents like clarifying va
 [Quickstart](#Quickstart) •
 [Demos](#Demos) •
 [Build agentic apps with Arch](#Build-AI-Agent-with-Arch-Gateway) •
-[Use Arch as an LLM router](#Use-Arch-Gateway-as-LLM-Router) •
+[Route LLMs](#Use-Arch-as-a-LLM-Router) •
 [Documentation](https://docs.archgw.com) •
 [Contact](#Contact)
 
@@ -39,10 +39,10 @@ With Arch, you can move faster by focusing on higher-level objectives in a langu
 
 **Core Features**:
 
-  - `🚦 Routing`. Engineered with purpose-built [LLMs](https://huggingface.co/collections/katanemo/arch-function-66f209a693ea8df14317ad68) for fast (<100ms) agent routing and hand-off scenarios
-  - `⚡ Tools Use`: For common agentic scenarios let Arch instantly clarify and convert prompts to tools/API calls
+  - `🚦 Routing to Agents`. Engineered with purpose-built [LLMs](https://huggingface.co/collections/katanemo/arch-function-66f209a693ea8df14317ad68) for fast (<100ms) agent routing and hand-off scenarios
+  - `🔗 Routing to LLMs`: Unify access and routing to any LLM, including dynamic routing via [preference policies](#Preference-based-Routing).
   - `⛨ Guardrails`: Centrally configure and prevent harmful outcomes and ensure safe user interactions
-  - `🔗 Access to LLMs`: Centralize access and traffic to LLMs with smart retries for continuous availability
+  - `⚡ Tools Use`: For common agentic scenarios let Arch instantly clarify and convert prompts to tools/API calls
   - `🕵 Observability`: W3C compatible request tracing and LLM metrics that instantly plugin with popular tools
   - `🧱 Built on Envoy`: Arch runs alongside app servers as a containerized process, and builds on top of [Envoy's](https://envoyproxy.io) proven HTTP management and scalability features to handle ingress and egress traffic related to prompts and LLMs.
 
@@ -85,7 +85,7 @@ $ source venv/bin/activate   # On Windows, use: venv\Scripts\activate
 $ pip install archgw==0.3.2
 ```
 
-### Build AI Agent with Arch Gateway
+### Build Agentic Apps with Arch Gateway
 
 In following quickstart we will show you how easy it is to build AI agent with Arch gateway. We will build a currency exchange agent using following simple steps. For this demo we will use `https://api.frankfurter.dev/` to fetch latest price for currencies and assume USD as base currency.
 
@@ -187,13 +187,11 @@ $ curl --header 'Content-Type: application/json' \
 
 ```
 
-### Use Arch Gateway as LLM Router
+### Use Arch as a LLM Router
+Arch supports two primary routing strategies for LLMs: model-based routing and preference-based routing.
 
-#### Step 1. Create arch config file
-
-Arch operates based on a configuration file where you can define LLM providers, prompt targets, guardrails, etc. Below is an example configuration that defines openai and mistral LLM providers.
-
-Create `arch_config.yaml` file with following content:
+#### Model-based Routing
+Model-based routing allows you to configure static model names for routing. This is useful when you always want to use a specific model for certain tasks, or manually swap between models. Below an example configuration for model-based routing, and you can follow our [usage guide](demos/use_cases/README.md) on how to get working.
 
 ```yaml
 version: v0.1.0
@@ -212,100 +210,46 @@ llm_providers:
     model: gpt-4o
     default: true
 
-  - name: ministral-3b
+  - name: mistral-3b
     access_key: $MISTRAL_API_KEY
     provider: openai
-    model: ministral-3b-latest
+    model: mistral-3b-latest
 ```
 
-#### Step 2. Start arch gateway
+#### Preference-based Routing
+Preference-based routing is designed for more dynamic and intelligent selection of models. Instead of static model names, you write plain-language routing policies that describe the type of task or preference — for example:
 
-Once the config file is created ensure that you have env vars setup for `MISTRAL_API_KEY` and `OPENAI_API_KEY` (or these are defined in `.env` file).
+```yaml
+version: v0.1.0
 
-Start arch gateway,
+listeners:
+  egress_traffic:
+    address: 0.0.0.0
+    port: 12000
+    message_format: openai
+    timeout: 30s
 
-```
-$ archgw up arch_config.yaml
-2024-12-05 11:24:51,288 - cli.main - INFO - Starting archgw cli version: 0.1.5
-2024-12-05 11:24:51,825 - cli.utils - INFO - Schema validation successful!
-2024-12-05 11:24:51,825 - cli.main - INFO - Starting arch model server and arch gateway
-...
-2024-12-05 11:25:16,131 - cli.core - INFO - Container is healthy!
-```
+llm_providers:
+  - name: code_generation
+    access_key: $OPENAI_API_KEY
+    provider_interface: openai
+    model: gpt-4.1
+    usage: generating new code snippets, functions, or boilerplate based on user prompts or requirements
 
-### Step 3: Interact with LLM
-
-#### Step 3.1: Using OpenAI python client
-
-Make outbound calls via Arch gateway
-
-```python
-from openai import OpenAI
-
-# Use the OpenAI client as usual
-client = OpenAI(
-  # No need to set a specific openai.api_key since it's configured in Arch's gateway
-  api_key = '--',
-  # Set the OpenAI API base URL to the Arch gateway endpoint
-  base_url = "http://127.0.0.1:12000/v1"
-)
-
-response = client.chat.completions.create(
-    # we select model from arch_config file
-    model="None",
-    messages=[{"role": "user", "content": "What is the capital of France?"}],
-)
-
-print("OpenAI Response:", response.choices[0].message.content)
-
+  - name: code_understanding
+    provider_interface: openai
+    access_key: $OPENAI_API_KEY
+    model: gpt-4o-mini
+    usage: understand and explain existing code snippets, functions, or libraries
 ```
 
-#### Step 3.2: Using curl command
-```
-$ curl --header 'Content-Type: application/json' \
-  --data '{"messages": [{"role": "user","content": "What is the capital of France?"}], "model": "none"}' \
-  http://localhost:12000/v1/chat/completions
+Arch uses a lightweight 1.5B autoregressive model to map prompts (and conversation context) to these policies. This approach adapts to intent drift, supports multi-turn conversations, and avoids the brittleness of embedding-based classifiers or manual if/else chains. No retraining is required when adding new models or updating policies — routing is governed entirely by human-readable rules. You can learn more about the design, benchmarks, and methodology behind preference-based routing in our paper:
 
-{
-  ...
-  "model": "gpt-4o-2024-08-06",
-  "choices": [
-    {
-      ...
-      "messages": {
-        "role": "assistant",
-        "content": "The capital of France is Paris.",
-      },
-    }
-  ],
-...
-}
-
-```
-
-You can override model selection using `x-arch-llm-provider-hint` header. For example if you want to use mistral using following curl command,
-
-```
-$ curl --header 'Content-Type: application/json' \
-  --header 'x-arch-llm-provider-hint: ministral-3b' \
-  --data '{"messages": [{"role": "user","content": "What is the capital of France?"}], "model": "none"}' \
-  http://localhost:12000/v1/chat/completions
-{
-  ...
-  "model": "ministral-3b-latest",
-  "choices": [
-    {
-      "messages": {
-        "role": "assistant",
-        "content": "The capital of France is Paris. It is the most populous city in France and is known for its iconic landmarks such as the Eiffel Tower, the Louvre Museum, and Notre-Dame Cathedral. Paris is also a major global center for art, fashion, gastronomy, and culture.",
-      },
-      ...
-    }
-  ],
-  ...
-}
-
-```
+<div align="left">
+  <a href="https://arxiv.org/abs/2506.16655" target="_blank">
+    <img src="docs/source/_static/img/arch_router_paper_preview.png" alt="Arch Router Paper Preview">
+  </a>
+</div>
 
 ## [Observability](https://docs.archgw.com/guides/observability/observability.html)
 Arch is designed to support best-in class observability by supporting open standards. Please read our [docs](https://docs.archgw.com/guides/observability/observability.html) on observability for more details on tracing, metrics, and logs. The screenshot below is from our integration with Signoz (among others)

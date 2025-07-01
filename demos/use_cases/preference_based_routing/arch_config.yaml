@@ -37,7 +37,7 @@ llm_providers:
   - name: code_understanding
     provider_interface: openai
     access_key: $OPENAI_API_KEY
-    model: gpt-4.1
+    model: gpt-4o-mini
     usage: understand and explain existing code snippets, functions, or libraries
 
 tracing:
