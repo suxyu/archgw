@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
@@ -109,6 +110,7 @@ pub struct ChatCompletionsRequest {
     pub frequency_penalty: Option<f32>,
     pub stream_options: Option<StreamOptions>,
     pub tools: Option<Vec<Value>>,
+    pub metadata: Option<HashMap<String, Value>>,
 }
 
 impl TryFrom<&[u8]> for ChatCompletionsRequest {

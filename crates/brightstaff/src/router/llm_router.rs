@@ -1,7 +1,7 @@
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 use common::{
-    configuration::{LlmProvider, LlmRoute},
+    configuration::{LlmProvider, LlmRoute, ModelUsagePreference},
     consts::ARCH_PROVIDER_HINT_HEADER,
 };
 use hermesllm::providers::openai::types::{ChatCompletionsResponse, ContentType, Message};
@@ -19,6 +19,7 @@ pub struct RouterService {
     router_model: Arc<dyn RouterModel>,
     routing_model_name: String,
     llm_usage_defined: bool,
+    llm_provider_map: HashMap<String, LlmProvider>,
 }
 
 #[derive(Debug, Error)]
@@ -55,12 +56,18 @@ impl RouterService {
             router_model_v1::MAX_TOKEN_LEN,
         ));
 
+        let llm_provider_map: HashMap<String, LlmProvider> = providers
+            .into_iter()
+            .map(|provider| (provider.name.clone(), provider))
+            .collect();
+
         RouterService {
             router_url,
             client: reqwest::Client::new(),
             router_model,
             routing_model_name,
             llm_usage_defined: !providers_with_usage.is_empty(),
+            llm_provider_map,
         }
     }
 
@@ -68,12 +75,15 @@ impl RouterService {
         &self,
         messages: &[Message],
         trace_parent: Option<String>,
+        usage_preferences: Option<Vec<ModelUsagePreference>>,
     ) -> Result<Option<String>> {
         if !self.llm_usage_defined {
             return Ok(None);
         }
 
-        let router_request = self.router_model.generate_request(messages);
+        let router_request = self
+            .router_model
+            .generate_request(messages, &usage_preferences);
 
         info!(
             "sending request to arch-router model: {}, endpoint: {}",
@@ -144,13 +154,40 @@ impl RouterService {
         if let Some(ContentType::Text(content)) =
             &chat_completion_response.choices[0].message.content
         {
+            let mut selected_model: Option<String> = None;
+            if let Some(selected_llm_name) = self.router_model.parse_response(content)? {
+                if selected_llm_name != "other" {
+                    if let Some(usage_preferences) = usage_preferences {
+                        for usage in usage_preferences {
+                            if usage.name == selected_llm_name {
+                                selected_model = Some(usage.model);
+                                break;
+                            }
+                        }
+                        if selected_model.is_none() {
+                            warn!(
+                                "Selected LLM model not found in usage preferences: {}",
+                                selected_llm_name
+                            );
+                        }
+                    } else if let Some(provider) = self.llm_provider_map.get(&selected_llm_name) {
+                        selected_model = provider.model.clone();
+                    } else {
+                        warn!(
+                            "Selected LLM model not found in provider map: {}",
+                            selected_llm_name
+                        );
+                    }
+                }
+            }
             info!(
-                "router response: {}, response time: {}ms",
+                "router response: {}, selected_model: {:?}, response time: {}ms",
                 content.replace("\n", "\\n"),
+                selected_model,
                 router_response_time.as_millis()
             );
-            let selected_llm = self.router_model.parse_response(content)?;
-            Ok(selected_llm)
+
+            Ok(selected_model)
         } else {
             Ok(None)
         }

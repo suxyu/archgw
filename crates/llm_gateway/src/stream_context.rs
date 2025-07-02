@@ -569,7 +569,11 @@ impl HttpContext for StreamContext {
                 match SseChatCompletionIter::try_from((body.as_slice(), &hermes_llm_provider)) {
                     Ok(events) => events,
                     Err(e) => {
-                        warn!("could not parse response: {}", e);
+                        warn!(
+                            "could not parse response: {}, body str: {}",
+                            e,
+                            String::from_utf8_lossy(&body)
+                        );
                         return Action::Continue;
                     }
                 };
@@ -614,7 +618,11 @@ impl HttpContext for StreamContext {
                 match ChatCompletionsResponse::try_from((body.as_slice(), &hermes_llm_provider)) {
                     Ok(de) => de,
                     Err(e) => {
-                        warn!("could not parse response: {}", e);
+                        warn!(
+                            "could not parse response: {}, body str: {}",
+                            e,
+                            String::from_utf8_lossy(&body)
+                        );
                         debug!(
                             "on_http_response_body: S[{}], response body: {}",
                             self.context_id,

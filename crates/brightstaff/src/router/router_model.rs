@@ -1,3 +1,4 @@
+use common::configuration::ModelUsagePreference;
 use hermesllm::providers::openai::types::{ChatCompletionsRequest, Message};
 use thiserror::Error;
 
@@ -10,7 +11,11 @@ pub enum RoutingModelError {
 pub type Result<T> = std::result::Result<T, RoutingModelError>;
 
 pub trait RouterModel: Send + Sync {
-    fn generate_request(&self, messages: &[Message]) -> ChatCompletionsRequest;
+    fn generate_request(
+        &self,
+        messages: &[Message],
+        usage_preferences: &Option<Vec<ModelUsagePreference>>,
+    ) -> ChatCompletionsRequest;
     fn parse_response(&self, content: &str) -> Result<Option<String>>;
     fn get_model_name(&self) -> String;
 }

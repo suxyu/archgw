@@ -101,6 +101,7 @@ impl OpenAIRequestBuilder {
             frequency_penalty: self.frequency_penalty,
             stream_options: self.stream_options,
             tools: self.tools,
+            metadata: None,
         };
         Ok(request)
     }

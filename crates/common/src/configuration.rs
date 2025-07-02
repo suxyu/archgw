@@ -1,5 +1,6 @@
 use hermesllm::providers::openai::types::{ModelDetail, ModelObject, Models};
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use std::collections::HashMap;
 use std::fmt::Display;
 
@@ -174,6 +175,14 @@ impl Display for LlmProviderType {
             LlmProviderType::OpenAI => write!(f, "openai"),
         }
     }
+}
+
+#[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ModelUsagePreference {
+    pub name: String,
+    pub model: String,
+    pub usage: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

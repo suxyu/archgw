@@ -7,10 +7,10 @@ use serde_json;
 use std::sync::Arc;
 
 pub async fn list_models(
-    llm_providers: Arc<Vec<LlmProvider>>,
+    llm_providers: Arc<tokio::sync::RwLock<Vec<LlmProvider>>>,
 ) -> Response<BoxBody<Bytes, hyper::Error>> {
-    let prov = llm_providers.clone();
-    let providers = (*prov).clone();
+    let prov = llm_providers.read().await;
+    let providers = prov.clone();
     let openai_models: Models = providers.into_models();
 
     match serde_json::to_string(&openai_models) {

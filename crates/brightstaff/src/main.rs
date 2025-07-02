@@ -1,5 +1,6 @@
 use brightstaff::handlers::chat_completions::chat_completions;
 use brightstaff::handlers::models::list_models;
+use brightstaff::handlers::preferences::{list_preferences, update_preferences};
 use brightstaff::router::llm_router::RouterService;
 use brightstaff::utils::tracing::init_tracer;
 use bytes::Bytes;
@@ -16,7 +17,8 @@ use opentelemetry_http::HeaderExtractor;
 use std::sync::Arc;
 use std::{env, fs};
 use tokio::net::TcpListener;
-use tracing::{debug, info};
+use tokio::sync::RwLock;
+use tracing::{debug, info, warn};
 
 pub mod router;
 
@@ -53,7 +55,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let arch_config = Arc::new(config);
 
-    let llm_providers = Arc::new(arch_config.llm_providers.clone());
+    let llm_providers = Arc::new(RwLock::new(arch_config.llm_providers.clone()));
 
     debug!(
         "arch_config: {:?}",
@@ -101,6 +103,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                             .with_context(parent_cx)
                             .await
                     }
+                    (&Method::GET, "/v1/router/preferences") => {
+                        Ok(list_preferences(llm_providers).await)
+                    }
+                    (&Method::PUT, "/v1/router/preferences") => {
+                        update_preferences(req, llm_providers).await
+                    }
                     (&Method::GET, "/v1/models") => Ok(list_models(llm_providers).await),
                     (&Method::OPTIONS, "/v1/models") => {
                         let mut response = Response::new(empty());
@@ -141,7 +149,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 .serve_connection(io, service)
                 .await
             {
-                info!("Error serving connection: {:?}", err);
+                warn!("Error serving connection: {:?}", err);
             }
         });
     }

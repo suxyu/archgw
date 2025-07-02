@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use bytes::Bytes;
+use common::configuration::ModelUsagePreference;
 use common::consts::ARCH_PROVIDER_HINT_HEADER;
 use hermesllm::providers::openai::types::ChatCompletionsRequest;
 use http_body_util::combinators::BoxBody;
@@ -11,7 +12,7 @@ use hyper::{Request, Response, StatusCode};
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tokio_stream::StreamExt;
-use tracing::{debug, info, warn};
+use tracing::{debug, info, trace, warn};
 
 use crate::router::llm_router::RouterService;
 
@@ -30,23 +31,57 @@ pub async fn chat_completions(
 
     let chat_request_bytes = request.collect().await?.to_bytes();
 
-    let chat_completion_request: ChatCompletionsRequest =
-        match ChatCompletionsRequest::try_from(chat_request_bytes.as_ref()) {
-            Ok(request) => request,
-            Err(err) => {
-                warn!(
-                    "arch-router request body string: {}",
-                    String::from_utf8_lossy(&chat_request_bytes)
-                );
-                let err_msg = format!("Failed to parse request body: {}", err);
-                warn!("{}", err_msg);
-                let mut bad_request = Response::new(full(err_msg));
-                *bad_request.status_mut() = StatusCode::BAD_REQUEST;
-                return Ok(bad_request);
-            }
-        };
+    let chat_request_parsed = serde_json::from_slice::<serde_json::Value>(&chat_request_bytes)
+        .inspect_err(|err| {
+            warn!(
+                "Failed to parse request body as JSON: err: {}, str: {}",
+                err,
+                String::from_utf8_lossy(&chat_request_bytes)
+            )
+        })
+        .unwrap_or_else(|_| {
+            warn!(
+                "Failed to parse request body as JSON: {}",
+                String::from_utf8_lossy(&chat_request_bytes)
+            );
+            serde_json::Value::Null
+        });
 
-    debug!(
+    if chat_request_parsed == serde_json::Value::Null {
+        warn!("Request body is not valid JSON");
+        let err_msg = "Request body is not valid JSON".to_string();
+        let mut bad_request = Response::new(full(err_msg));
+        *bad_request.status_mut() = StatusCode::BAD_REQUEST;
+        return Ok(bad_request);
+    }
+
+    let chat_completion_request: ChatCompletionsRequest =
+        serde_json::from_value(chat_request_parsed.clone()).unwrap();
+
+    // remove metadata from the request
+    let mut chat_request_user_preferences_removed = chat_request_parsed;
+    if let Some(metadata) = chat_request_user_preferences_removed.get_mut("metadata") {
+        info!("Removing metadata from request");
+        if let Some(m) = metadata.as_object_mut() {
+            m.remove("archgw_preference_config");
+            info!("Removed archgw_preference_config from metadata");
+        }
+
+        // metadata.as_object_mut().map(|m| {
+        //     m.remove("archgw_preference_config");
+        //     info!("Removed archgw_preference_config from metadata");
+        // });
+
+        // if metadata is empty, remove it
+        if metadata.as_object().map_or(false, |m| m.is_empty()) {
+            info!("Removing empty metadata from request");
+            chat_request_user_preferences_removed
+                .as_object_mut()
+                .map(|m| m.remove("metadata"));
+        }
+    }
+
+    trace!(
         "arch-router request body: {}",
         &serde_json::to_string(&chat_completion_request).unwrap()
     );
@@ -56,8 +91,25 @@ pub async fn chat_completions(
         .find(|(ty, _)| ty.as_str() == "traceparent")
         .map(|(_, value)| value.to_str().unwrap_or_default().to_string());
 
+    let usage_preferences_str: Option<String> =
+        chat_completion_request.metadata.and_then(|metadata| {
+            metadata
+                .get("archgw_preference_config")
+                .and_then(|value| value.as_str().map(String::from))
+        });
+
+    let usage_preferences: Option<Vec<ModelUsagePreference>> = usage_preferences_str
+        .as_ref()
+        .and_then(|s| serde_yaml::from_str(s).ok());
+
+    debug!("usage preferences: {:?}", usage_preferences);
+
     let mut selected_llm = match router_service
-        .determine_route(&chat_completion_request.messages, trace_parent.clone())
+        .determine_route(
+            &chat_completion_request.messages,
+            trace_parent.clone(),
+            usage_preferences,
+        )
         .await
     {
         Ok(route) => route,
@@ -93,10 +145,16 @@ pub async fn chat_completions(
         );
     }
 
+    let chat_request_parsed_bytes =
+        serde_json::to_string(&chat_request_user_preferences_removed).unwrap();
+
+    // remove content-length header if it exists
+    request_headers.remove(header::CONTENT_LENGTH);
+
     let llm_response = match reqwest::Client::new()
         .post(llm_provider_endpoint)
         .headers(request_headers)
-        .body(chat_request_bytes)
+        .body(chat_request_parsed_bytes)
         .send()
         .await
     {
