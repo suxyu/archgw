@@ -4,7 +4,7 @@
 <div align="center">
 
 
-_The proxy server and the universal data plane for AI-nativr apps._<br><br>
+_The proxy server and the universal data plane for AI-native apps._<br><br>
 Arch handles the *pesky low-level work* in building AI agents like clarifying vague user inputs, routing prompts to the right agents, calling tools for simple tasks, and unifying access to large language models (LLMs) - all without locking you into a framework. Move faster by focusing on the high-level logic of your agents.
 
 
