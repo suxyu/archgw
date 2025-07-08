@@ -23,6 +23,8 @@ use tracing::{debug, info, warn};
 pub mod router;
 
 const BIND_ADDRESS: &str = "0.0.0.0:9091";
+const DEFAULT_ROUTING_LLM_PROVIDER: &str = "arch-router";
+const DEFAULT_ROUTING_MODEL_NAME: &str = "Arch-Router";
 
 // Utility function to extract the context from the incoming request headers
 fn extract_context_from_request(req: &Request<Incoming>) -> Context {
@@ -69,16 +71,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     info!("listening on http://{}", bind_address);
     let listener = TcpListener::bind(bind_address).await?;
 
-    let model = arch_config
+    let routing_model_name: String = arch_config
         .routing
         .as_ref()
-        .map(|r| r.model.clone())
-        .unwrap_or_else(|| "none".to_string());
+        .and_then(|r| r.model.clone())
+        .unwrap_or_else(|| DEFAULT_ROUTING_MODEL_NAME.to_string());
+
+    let routing_llm_provider = arch_config
+        .routing
+        .as_ref()
+        .and_then(|r| r.llm_provider.clone())
+        .unwrap_or_else(|| DEFAULT_ROUTING_LLM_PROVIDER.to_string());
 
     let router_service: Arc<RouterService> = Arc::new(RouterService::new(
         arch_config.llm_providers.clone(),
         llm_provider_endpoint.clone(),
-        model,
+        routing_model_name,
+        routing_llm_provider,
     ));
 
     loop {

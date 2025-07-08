@@ -140,14 +140,20 @@ def validate_and_render_schema():
             llm_provider["protocol"] = protocol
             llms_with_endpoint.append(llm_provider)
 
-    if (
-        len(llms_with_usage) > 0
-        and config_yaml.get("routing", {}).get("model", None) == None
-    ):
-        llms_with_usage_names = ", ".join(llms_with_usage)
-        raise Exception(
-            f"LLMs with usage found ({llms_with_usage_names}), please provide model in routing section in your arch_config.yaml file"
-        )
+    if len(llms_with_usage) > 0:
+        routing_llm_provider = config_yaml.get("routing", {}).get("llm_provider", None)
+        if routing_llm_provider and routing_llm_provider not in llm_provider_name_set:
+            raise Exception(
+                f"Routing llm_provider {routing_llm_provider} is not defined in llm_providers"
+            )
+        if routing_llm_provider is None and "arch-router" not in llm_provider_name_set:
+            updated_llm_providers.append(
+                {
+                    "name": "arch-router",
+                    "provider_interface": "arch",
+                    "model": config_yaml.get("routing", {}).get("model", "Arch-Router"),
+                }
+            )
 
     config_yaml["llm_providers"] = updated_llm_providers
 

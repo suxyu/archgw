@@ -10,7 +10,8 @@ use crate::api::open_ai::{
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Routing {
-    pub model: String,
+    pub llm_provider: Option<String>,
+    pub model: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

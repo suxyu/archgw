@@ -22,8 +22,8 @@ Content-Type: application/json
 
 ### get model list from arch-function
 GET https://archfc.katanemo.dev/v1/models HTTP/1.1
-model: arch-router
+model: Arch-Router
 
-### get model list from arch-router (notice model header)
+### get model list from Arch-Router (notice model header)
 GET https://archfc.katanemo.dev/v1/models HTTP/1.1
-model: arch-router
+model: Arch-Router

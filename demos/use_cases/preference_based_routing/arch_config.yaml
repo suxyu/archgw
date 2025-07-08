@@ -1,8 +1,5 @@
 version: v0.1.0
 
-routing:
-  model: arch-router
-
 listeners:
   egress_traffic:
     address: 0.0.0.0
@@ -11,11 +8,6 @@ listeners:
     timeout: 30s
 
 llm_providers:
-
-  - name: arch-router
-    access_key: $ARCH_API_KEY
-    provider_interface: arch
-    model: Arch-Router
 
   - name: gpt-4o-mini
     provider_interface: openai

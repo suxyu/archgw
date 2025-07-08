@@ -247,7 +247,10 @@ impl HttpContext for StreamContext {
             }
             if let Err(error) = self.modify_auth_headers() {
                 // ensure that the provider has an endpoint if the access key is missing else return a bad request
-                if self.llm_provider.as_ref().unwrap().endpoint.is_none() && !use_agent_orchestrator
+                if self.llm_provider.as_ref().unwrap().endpoint.is_none()
+                    && !use_agent_orchestrator
+                    && self.llm_provider.as_ref().unwrap().provider_interface
+                        != LlmProviderType::Arch
                 {
                     self.send_server_error(error, Some(StatusCode::BAD_REQUEST));
                 }

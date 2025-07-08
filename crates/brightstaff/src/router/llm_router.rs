@@ -17,7 +17,7 @@ pub struct RouterService {
     router_url: String,
     client: reqwest::Client,
     router_model: Arc<dyn RouterModel>,
-    routing_model_name: String,
+    routing_provider_name: String,
     llm_usage_defined: bool,
     llm_provider_map: HashMap<String, LlmProvider>,
 }
@@ -41,6 +41,7 @@ impl RouterService {
         providers: Vec<LlmProvider>,
         router_url: String,
         routing_model_name: String,
+        routing_provider_name: String,
     ) -> Self {
         let providers_with_usage = providers
             .iter()
@@ -65,7 +66,7 @@ impl RouterService {
             router_url,
             client: reqwest::Client::new(),
             router_model,
-            routing_model_name,
+            routing_provider_name,
             llm_usage_defined: !providers_with_usage.is_empty(),
             llm_provider_map,
         }
@@ -104,7 +105,7 @@ impl RouterService {
 
         llm_route_request_headers.insert(
             header::HeaderName::from_static(ARCH_PROVIDER_HINT_HEADER),
-            header::HeaderValue::from_str(&self.routing_model_name).unwrap(),
+            header::HeaderValue::from_str(&self.routing_provider_name).unwrap(),
         );
 
         if let Some(trace_parent) = trace_parent {

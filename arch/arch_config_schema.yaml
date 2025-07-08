@@ -239,6 +239,8 @@ properties:
   routing:
     type: object
     properties:
+      llm_provider:
+        type: string
       model:
         type: string
       additionalProperties: false
