@@ -1,11 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "RouteGPT (beta)",
-  "version": "0.1.0",
+  "name": "RouteGPT",
+  "version": "0.1.1",
   "description": "RouteGPT: Smart Model Routing for ChatGPT.",
   "permissions": [
-    "storage",
-    "tabs"
+    "storage"
   ],
   "host_permissions": [
     "https://chatgpt.com/*",

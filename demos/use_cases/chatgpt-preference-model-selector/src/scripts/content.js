@@ -311,6 +311,7 @@ Based on your analysis, provide your response in the following JSON formats if y
   });
 
   let desiredModel = null;
+
   function patchDom() {
     if (!desiredModel) return;
 
@@ -320,17 +321,25 @@ Based on your analysis, provide your response in the following JSON formats if y
     const span = btn.querySelector('div > span');
     const wantLabel = `Model selector, current model is ${desiredModel}`;
 
-    if (span && span.textContent !== desiredModel) span.textContent = desiredModel;
+    if (span && span.textContent !== desiredModel) {
+      span.textContent = desiredModel;
+    }
+
     if (btn.getAttribute('aria-label') !== wantLabel) {
       btn.setAttribute('aria-label', wantLabel);
     }
   }
 
+  // Observe DOM mutations and reactively patch
   const observer = new MutationObserver(patchDom);
   observer.observe(document.body || document.documentElement, {
-    subtree: true, childList: true, characterData: true, attributes: true
+    subtree: true,
+    childList: true,
+    characterData: true,
+    attributes: true
   });
 
+  // Set initial model from storage (optional default)
   chrome.storage.sync.get(['defaultModel'], ({ defaultModel }) => {
     if (defaultModel) {
       desiredModel = defaultModel;
@@ -338,9 +347,16 @@ Based on your analysis, provide your response in the following JSON formats if y
     }
   });
 
-  chrome.runtime.onMessage.addListener(msg => {
-    if (msg.action === 'applyModelSelection' && msg.model) {
-      desiredModel = msg.model;
+  // ✅ Only listen for messages from iframe via window.postMessage
+  window.addEventListener('message', (event) => {
+    const data = event.data;
+    if (
+      typeof data === 'object' &&
+      data?.action === 'applyModelSelection' &&
+      typeof data.model === 'string'
+    ) {
+
+      desiredModel = data.model;
       patchDom();
     }
   });

@@ -220,11 +220,10 @@ export default function PreferenceBasedModelSelector() {
         console.log('[PBMS] Saved tuples:', tuples);
       }
     });
+    // Send message to background script to apply the default model
+    window.parent.postMessage({ action: 'applyModelSelection', model: defaultModel }, "*");
 
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, { action: 'applyModelSelection', model: defaultModel });
-    });
-
+    // Close the modal after saving
     window.parent.postMessage({ action: 'CLOSE_PBMS_MODAL' }, '*');
   };
 
