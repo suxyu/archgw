@@ -4,13 +4,12 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
-
     {
-      "name": "model server",
-      "type": "debugpy",
+      "type": "java",
+      "name": "WeatherForecastApplication",
       "request": "launch",
-      "module": "uvicorn",
-      "args": ["src.main:app","--reload", "--port", "51000"]
+      "mainClass": "weather.WeatherForecastApplication",
+      "projectName": "weather-forecast-service"
     }
   ]
 }

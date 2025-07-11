@@ -14,32 +14,24 @@ listeners:
 llm_providers:
 
   - name: arch-router
-    provider_interface: arch
-    model: hf.co/katanemo/Arch-Router-1.5B.gguf:Q4_K_M
-    endpoint: host.docker.internal:11434
+    model: arch/hf.co/katanemo/Arch-Router-1.5B.gguf:Q4_K_M
+    base_url: http://host.docker.internal:11434
 
-  - name: gpt-4o-mini
-    provider_interface: openai
+  - model: openai/gpt-4o-mini
     access_key: $OPENAI_API_KEY
-    model: gpt-4o-mini
-
-  - name: gpt-4.1
-    provider_interface: openai
-    access_key: $OPENAI_API_KEY
-    model: gpt-4.1
     default: true
 
-  - name: code_generation
+  - model: openai/gpt-4o
     access_key: $OPENAI_API_KEY
-    provider_interface: openai
-    model: gpt-4.1
-    usage: generating new code snippets, functions, or boilerplate based on user prompts or requirements
+    routing_preferences:
+      - name: code understanding
+        description: understand and explain existing code snippets, functions, or libraries
 
-  - name: code_understanding
-    provider_interface: openai
+  - model: openai/gpt-4.1
     access_key: $OPENAI_API_KEY
-    model: gpt-4.1
-    usage: understand and explain existing code snippets, functions, or libraries
+    routing_preferences:
+      - name: code generation
+        description: generating new code snippets, functions, or boilerplate based on user prompts or requirements
 
 tracing:
   random_sampling: 100

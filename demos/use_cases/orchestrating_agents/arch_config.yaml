@@ -22,10 +22,8 @@ endpoints:
     connect_timeout: 0.005s
 
 llm_providers:
-  - name: gpt-4o-mini
-    access_key: $OPENAI_API_KEY
-    provider_interface: openai
-    model: gpt-4o-mini
+  - access_key: $OPENAI_API_KEY
+    model: openai/gpt-4o-mini
     default: true
 
 system_prompt: |

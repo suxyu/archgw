@@ -58,7 +58,16 @@ impl TryFrom<Vec<LlmProvider>> for LlmProviders {
             let name = llm_provider.name.clone();
             if llm_providers
                 .providers
-                .insert(name.clone(), llm_provider)
+                .insert(name.clone(), llm_provider.clone())
+                .is_some()
+            {
+                return Err(LlmProvidersNewError::DuplicateName(name));
+            }
+
+            // also add model_id as key for provider lookup
+            if llm_providers
+                .providers
+                .insert(llm_provider.model.clone().unwrap(), llm_provider)
                 .is_some()
             {
                 return Err(LlmProvidersNewError::DuplicateName(name));

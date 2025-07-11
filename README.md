@@ -104,10 +104,8 @@ listeners:
     timeout: 30s
 
 llm_providers:
-  - name: gpt-4o
-    access_key: $OPENAI_API_KEY
-    provider: openai
-    model: gpt-4o
+  - access_key: $OPENAI_API_KEY
+    model: openai/gpt-4o
 
 system_prompt: |
   You are a helpful assistant.
@@ -204,16 +202,12 @@ listeners:
     timeout: 30s
 
 llm_providers:
-  - name: gpt-4o
-    access_key: $OPENAI_API_KEY
-    provider: openai
-    model: gpt-4o
+  - access_key: $OPENAI_API_KEY
+    model: openai/gpt-4o
     default: true
 
-  - name: mistral-3b
-    access_key: $MISTRAL_API_KEY
-    provider: openai
-    model: mistral-3b-latest
+  - access_key: $MISTRAL_API_KEY
+    model: mistral/mistral-3b-latest
 ```
 
 #### Preference-based Routing
@@ -230,17 +224,18 @@ listeners:
     timeout: 30s
 
 llm_providers:
-  - name: code_generation
+  - model: openai/gpt-4.1
     access_key: $OPENAI_API_KEY
-    provider_interface: openai
-    model: gpt-4.1
-    usage: generating new code snippets, functions, or boilerplate based on user prompts or requirements
+    default: true
+    routing_preferences:
+      - name: code generation
+        description: generating new code snippets, functions, or boilerplate based on user prompts or requirements
 
-  - name: code_understanding
-    provider_interface: openai
+  - model: openai/gpt-4o-mini
     access_key: $OPENAI_API_KEY
-    model: gpt-4o-mini
-    usage: understand and explain existing code snippets, functions, or libraries
+    routing_preferences:
+      - name: code understanding
+        description: understand and explain existing code snippets, functions, or libraries
 ```
 
 Arch uses a lightweight 1.5B autoregressive model to map prompts (and conversation context) to these policies. This approach adapts to intent drift, supports multi-turn conversations, and avoids the brittleness of embedding-based classifiers or manual if/else chains. No retraining is required when adding new models or updating policies — routing is governed entirely by human-readable rules. You can learn more about the design, benchmarks, and methodology behind preference-based routing in our paper:

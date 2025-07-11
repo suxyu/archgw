@@ -30,7 +30,10 @@ fn request_headers_expectations(module: &mut Tester, http_context: i32) {
             Some("x-arch-llm-provider-hint"),
         )
         .returning(None)
-        .expect_log(Some(LogLevel::Debug), Some("request received: llm provider hint: default, selected llm: open-ai-gpt-4, model: gpt-4"))
+        .expect_log(
+            Some(LogLevel::Debug),
+            Some("request received: llm provider hint: default, selected provider: open-ai-gpt-4"),
+        )
         .expect_add_header_map_value(
             Some(MapType::HttpRequestHeaders),
             Some("x-arch-llm-provider"),
@@ -263,7 +266,7 @@ fn llm_gateway_bad_request_to_open_ai_chat_completions() {
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(incomplete_chat_completions_request_body))
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Info), Some("on_http_request_body: provider: open-ai-gpt-4, model requested: gpt-1, model selected: gpt-4"))
+        .expect_log(Some(LogLevel::Info), Some("on_http_request_body: provider: open-ai-gpt-4, model requested (in body): gpt-1, model selected: gpt-4"))
         .expect_send_local_response(
             Some(StatusCode::BAD_REQUEST.as_u16().into()),
             None,
@@ -429,7 +432,7 @@ fn llm_gateway_override_model_name() {
         .returning(Some(chat_completions_request_body))
         // The actual call is not important in this test, we just need to grab the token_id
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Info), Some("on_http_request_body: provider: open-ai-gpt-4, model requested: gpt-1, model selected: gpt-4"))
+        .expect_log(Some(LogLevel::Info), Some("on_http_request_body: provider: open-ai-gpt-4, model requested (in body): gpt-1, model selected: gpt-4"))
         .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Debug), None)
         .expect_metric_record("input_sequence_length", 29)
@@ -478,7 +481,7 @@ fn llm_gateway_override_use_default_model() {
         // The actual call is not important in this test, we just need to grab the token_id
         .expect_log(
             Some(LogLevel::Info),
-            Some("on_http_request_body: provider: open-ai-gpt-4, model requested: gpt-1, model selected: gpt-4"),
+            Some("on_http_request_body: provider: open-ai-gpt-4, model requested (in body): gpt-1, model selected: gpt-4"),
         )
         .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Debug), None)
@@ -526,7 +529,7 @@ fn llm_gateway_override_use_model_name_none() {
         .returning(Some(chat_completions_request_body))
         // The actual call is not important in this test, we just need to grab the token_id
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Info), Some("on_http_request_body: provider: open-ai-gpt-4, model requested: none, model selected: gpt-4"))
+        .expect_log(Some(LogLevel::Info), Some("on_http_request_body: provider: open-ai-gpt-4, model requested (in body): none, model selected: gpt-4"))
         .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Debug), None)
         .expect_metric_record("input_sequence_length", 29)

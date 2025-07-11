@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Brightstaff",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/target/debug/brightstaff",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "stopOnEntry": false,
+      "sourceLanguages": ["rust"],
+      "env": {
+        "RUST_LOG": "debug",
+        "RUST_BACKTRACE": "1",
+        "ARCH_CONFIG_PATH_RENDERED": "../demos/use_cases/preference_based_routing/arch_config_rendered.yaml"
+      },
+      "preLaunchTask": "rust: cargo build"
+    }
+  ]
+}

@@ -8,10 +8,8 @@ listeners:
     timeout: 30s
 
 llm_providers:
-  - name: gpt-4o
-    access_key: $OPENAI_API_KEY
-    provider_interface: openai
-    model: gpt-4o
+  - access_key: $OPENAI_API_KEY
+    model: openai/gpt-4o
 
 endpoints:
   twelvedata_api:

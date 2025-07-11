@@ -187,22 +187,9 @@ pub struct ModelUsagePreference {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LlmRoute {
+pub struct RoutingPreference {
     pub name: String,
     pub description: String,
-}
-
-impl From<&LlmProvider> for LlmRoute {
-    fn from(provider: &LlmProvider) -> Self {
-        Self {
-            name: provider.name.to_string(),
-            description: provider
-                .usage
-                .as_ref()
-                .cloned()
-                .unwrap_or_else(|| "No description available".to_string()),
-        }
-    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -218,6 +205,7 @@ pub struct LlmProvider {
     pub port: Option<u16>,
     pub rate_limits: Option<LlmRatelimit>,
     pub usage: Option<String>,
+    pub routing_preferences: Option<Vec<RoutingPreference>>,
 }
 
 pub trait IntoModels {
@@ -256,6 +244,7 @@ impl Default for LlmProvider {
             port: None,
             rate_limits: None,
             usage: None,
+            routing_preferences: None,
         }
     }
 }
@@ -368,7 +357,7 @@ mod test {
     #[test]
     fn test_deserialize_configuration() {
         let ref_config = fs::read_to_string(
-            "../../docs/source/resources/includes/arch_config_full_reference.yaml",
+            "../../docs/source/resources/includes/arch_config_full_reference_rendered.yaml",
         )
         .expect("reference config file not found");
 
@@ -429,7 +418,7 @@ mod test {
     #[test]
     fn test_tool_conversion() {
         let ref_config = fs::read_to_string(
-            "../../docs/source/resources/includes/arch_config_full_reference.yaml",
+            "../../docs/source/resources/includes/arch_config_full_reference_rendered.yaml",
         )
         .expect("reference config file not found");
         let config: super::Configuration = serde_yaml::from_str(&ref_config).unwrap();

@@ -85,10 +85,8 @@ system_prompt: |
   Make sure your output is valid Markdown. And don't say "formatted in Markdown". Thanks!
 
 llm_providers:
-  - name: openai
-    provider_interface: openai
-    access_key: $OPENAI_API_KEY
-    model: gpt-4o
+  - access_key: $OPENAI_API_KEY
+    model: openai/gpt-4o
     default: true
 
 prompt_targets:

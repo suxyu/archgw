@@ -1,5 +1,5 @@
 use common::{
-    configuration::{LlmRoute, ModelUsagePreference},
+    configuration::{ModelUsagePreference, RoutingPreference},
     consts::{SYSTEM_ROLE, TOOL_ROLE, USER_ROLE},
 };
 use hermesllm::providers::openai::types::{ChatCompletionsRequest, ContentType, Message};
@@ -36,7 +36,11 @@ pub struct RouterModelV1 {
     max_token_length: usize,
 }
 impl RouterModelV1 {
-    pub fn new(llm_routes: Vec<LlmRoute>, routing_model: String, max_token_length: usize) -> Self {
+    pub fn new(
+        llm_routes: Vec<RoutingPreference>,
+        routing_model: String,
+        max_token_length: usize,
+    ) -> Self {
         let llm_route_json_str =
             serde_json::to_string(&llm_routes).unwrap_or_else(|_| "[]".to_string());
         RouterModelV1 {
@@ -138,9 +142,9 @@ impl RouterModel for RouterModelV1 {
         let llm_route_json = usage_preferences
             .as_ref()
             .map(|prefs| {
-                let llm_route: Vec<LlmRoute> = prefs
+                let llm_route: Vec<RoutingPreference> = prefs
                     .iter()
-                    .map(|pref| LlmRoute {
+                    .map(|pref| RoutingPreference {
                         name: pref.name.clone(),
                         description: pref.usage.clone().unwrap_or_default(),
                     })
@@ -255,7 +259,7 @@ Based on your analysis, provide your response in the following JSON formats if y
               {"name": "Speech Recognition", "description": "Converting spoken language into written text"}
           ]
         "#;
-        let llm_routes = serde_json::from_str::<Vec<LlmRoute>>(routes_str).unwrap();
+        let llm_routes = serde_json::from_str::<Vec<RoutingPreference>>(routes_str).unwrap();
         let routing_model = "test-model".to_string();
         let router = RouterModelV1::new(llm_routes, routing_model.clone(), usize::MAX);
 
@@ -314,7 +318,7 @@ Based on your analysis, provide your response in the following JSON formats if y
               {"name": "Speech Recognition", "description": "Converting spoken language into written text"}
           ]
         "#;
-        let llm_routes = serde_json::from_str::<Vec<LlmRoute>>(routes_str).unwrap();
+        let llm_routes = serde_json::from_str::<Vec<RoutingPreference>>(routes_str).unwrap();
         let routing_model = "test-model".to_string();
         let router = RouterModelV1::new(llm_routes, routing_model.clone(), usize::MAX);
 
@@ -379,7 +383,7 @@ Based on your analysis, provide your response in the following JSON formats if y
               {"name": "Speech Recognition", "description": "Converting spoken language into written text"}
           ]
         "#;
-        let llm_routes = serde_json::from_str::<Vec<LlmRoute>>(routes_str).unwrap();
+        let llm_routes = serde_json::from_str::<Vec<RoutingPreference>>(routes_str).unwrap();
         let routing_model = "test-model".to_string();
         let router = RouterModelV1::new(llm_routes, routing_model.clone(), 235);
 
@@ -440,7 +444,7 @@ Based on your analysis, provide your response in the following JSON formats if y
               {"name": "Speech Recognition", "description": "Converting spoken language into written text"}
           ]
         "#;
-        let llm_routes = serde_json::from_str::<Vec<LlmRoute>>(routes_str).unwrap();
+        let llm_routes = serde_json::from_str::<Vec<RoutingPreference>>(routes_str).unwrap();
         let routing_model = "test-model".to_string();
         let router = RouterModelV1::new(llm_routes, routing_model.clone(), 200);
 
@@ -501,7 +505,7 @@ Based on your analysis, provide your response in the following JSON formats if y
               {"name": "Speech Recognition", "description": "Converting spoken language into written text"}
           ]
         "#;
-        let llm_routes = serde_json::from_str::<Vec<LlmRoute>>(routes_str).unwrap();
+        let llm_routes = serde_json::from_str::<Vec<RoutingPreference>>(routes_str).unwrap();
         let routing_model = "test-model".to_string();
         let router = RouterModelV1::new(llm_routes, routing_model.clone(), 230);
 
@@ -569,7 +573,7 @@ Based on your analysis, provide your response in the following JSON formats if y
               {"name": "Speech Recognition", "description": "Converting spoken language into written text"}
           ]
         "#;
-        let llm_routes = serde_json::from_str::<Vec<LlmRoute>>(routes_str).unwrap();
+        let llm_routes = serde_json::from_str::<Vec<RoutingPreference>>(routes_str).unwrap();
         let routing_model = "test-model".to_string();
         let router = RouterModelV1::new(llm_routes, routing_model.clone(), usize::MAX);
 
@@ -639,7 +643,7 @@ Based on your analysis, provide your response in the following JSON formats if y
               {"name": "Speech Recognition", "description": "Converting spoken language into written text"}
           ]
         "#;
-        let llm_routes = serde_json::from_str::<Vec<LlmRoute>>(routes_str).unwrap();
+        let llm_routes = serde_json::from_str::<Vec<RoutingPreference>>(routes_str).unwrap();
         let routing_model = "test-model".to_string();
         let router = RouterModelV1::new(llm_routes, routing_model.clone(), usize::MAX);
 
@@ -716,7 +720,7 @@ Based on your analysis, provide your response in the following JSON formats if y
     {"name": "Speech Recognition", "description": "Converting spoken language into written text"}
 ]
 "#;
-        let llm_routes = serde_json::from_str::<Vec<LlmRoute>>(routes_str).unwrap();
+        let llm_routes = serde_json::from_str::<Vec<RoutingPreference>>(routes_str).unwrap();
 
         let router = RouterModelV1::new(llm_routes, "test-model".to_string(), 2000);
 

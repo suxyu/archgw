@@ -9,10 +9,9 @@ listeners:
 
 llm_providers:
 
-  - name: local-llama
+  - model: my_llm_provider/llama3.2
     provider_interface: openai
-    model: llama3.2
-    endpoint: host.docker.internal:11434
+    base_url: http://host.docker.internal:11434
     default: true
 
 system_prompt: |

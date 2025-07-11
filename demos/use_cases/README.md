@@ -13,16 +13,12 @@ listeners:
     timeout: 30s
 
 llm_providers:
-  - name: gpt-4o
-    access_key: $OPENAI_API_KEY
-    provider: openai
-    model: gpt-4o
+  - access_key: $OPENAI_API_KEY
+    model: openai/gpt-4o
     default: true
 
-  - name: ministral-3b
-    access_key: $MISTRAL_API_KEY
-    provider: openai
-    model: ministral-3b-latest
+  - access_key: $MISTRAL_API_KEY
+    model: mistral/ministral-3b-latest
 ```
 
 ### Step 2. Start arch gateway

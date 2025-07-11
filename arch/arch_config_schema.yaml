@@ -66,11 +66,16 @@ properties:
       properties:
         name:
           type: string
-        # provider field is deprecated, use provider_interface instead
-        provider:
+        access_key:
           type: string
-          enum:
-            - openai
+        model:
+          type: string
+        default:
+          type: boolean
+        base_url:
+          type: string
+        http_host:
+          type: string
         provider_interface:
           type: string
           enum:
@@ -81,29 +86,22 @@ properties:
             - mistral
             - openai
             - gemini
-        access_key:
-          type: string
-        model:
-          type: string
-        default:
-          type: boolean
-        # endpoint field is deprecated, use base_url instead
-        endpoint:
-          type: string
-        base_url:
-          type: string
-        protocol:
-          type: string
-          enum:
-            - http
-            - https
-        http_host:
-          type: string
-        usage:
-          type: string
+        routing_preferences:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+          additionalProperties: false
+          required:
+            - name
+            - description
       additionalProperties: false
       required:
-        - name
+        - model
   overrides:
     type: object
     properties:

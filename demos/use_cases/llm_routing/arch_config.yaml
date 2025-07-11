@@ -9,46 +9,34 @@ listeners:
 
 llm_providers:
 
-  - name: gpt-4o-mini
-    access_key: $OPENAI_API_KEY
-    provider_interface: openai
-    model: gpt-4o-mini
+  - access_key: $OPENAI_API_KEY
+    model: openai/gpt-4o-mini
 
-  - name: gpt-4o
-    access_key: $OPENAI_API_KEY
-    provider_interface: openai
-    model: gpt-4o
+  - access_key: $OPENAI_API_KEY
+    model: openai/gpt-4o
     default: true
 
-  - name: ministral-3b
-    access_key: $MISTRAL_API_KEY
-    provider_interface: mistral
-    model: ministral-3b-latest
+  - access_key: $MISTRAL_API_KEY
+    model: mistral/ministral-3b-latest
 
-  - name: claude-sonnet
-    access_key: $ANTHROPIC_API_KEY
-    provider_interface: claude
-    model: claude-3-7-sonnet-latest
+  - access_key: $ANTHROPIC_API_KEY
+    model: claude/claude-3-7-sonnet-latest
 
-  - name: claude-sonnet-4
-    access_key: $ANTHROPIC_API_KEY
-    provider_interface: claude
-    model: claude-sonnet-4-0
+  - access_key: $ANTHROPIC_API_KEY
+    model: claude/claude-sonnet-4-0
 
-  - name: deepseek
-    access_key: $DEEPSEEK_API_KEY
-    provider_interface: deepseek
-    model: deepseek-reasoner
+  - access_key: $DEEPSEEK_API_KEY
+    model: deepseek/deepseek-reasoner
 
-  - name: groq
-    access_key: $GROQ_API_KEY
-    provider_interface: groq
-    model: llama-3.1-8b-instant
+  - access_key: $GROQ_API_KEY
+    model: groq/llama-3.1-8b-instant
 
-  - name: gemini
-    access_key: $GEMINI_API_KEY
-    provider_interface: gemini
-    model: gemini-1.5-pro-latest
+  - access_key: $GEMINI_API_KEY
+    model: gemini/gemini-1.5-pro-latest
+
+  - model: custom/test-model
+    base_url: http://host.docker.internal:11223
+    provider_interface: openai
 
 tracing:
   random_sampling: 100

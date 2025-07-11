@@ -1,0 +1,81 @@
+endpoints:
+  app_server:
+    connect_timeout: 0.005s
+    endpoint: 127.0.0.1
+    port: 80
+  error_target:
+    endpoint: error_target_1
+    port: 80
+  mistral_local:
+    endpoint: 127.0.0.1
+    port: 8001
+listeners:
+  egress_traffic:
+    address: 0.0.0.0
+    message_format: openai
+    port: 12000
+    timeout: 5s
+  ingress_traffic:
+    address: 0.0.0.0
+    message_format: openai
+    port: 10000
+    timeout: 5s
+llm_providers:
+- access_key: $OPENAI_API_KEY
+  default: true
+  model: gpt-4o
+  name: openai/gpt-4o
+  provider_interface: openai
+- access_key: $MISTRAL_API_KEY
+  model: mistral-8x7b
+  name: mistral/mistral-8x7b
+  provider_interface: mistral
+- base_url: http://mistral_local
+  endpoint: mistral_local
+  model: mistral-7b-instruct
+  name: mistral/mistral-7b-instruct
+  port: 80
+  protocol: http
+  provider_interface: mistral
+overrides:
+  prompt_target_intent_matching_threshold: 0.6
+prompt_guards:
+  input_guards:
+    jailbreak:
+      on_exception:
+        message: Looks like you're curious about my abilities, but I can only provide
+          assistance within my programmed parameters.
+prompt_targets:
+- auto_llm_dispatch_on_response: true
+  default: true
+  description: handel all scenarios that are question and answer in nature. Like summarization,
+    information extraction, etc.
+  endpoint:
+    http_method: POST
+    name: app_server
+    path: /agent/summary
+  name: information_extraction
+  system_prompt: You are a helpful information extraction assistant. Use the information
+    that is provided to you.
+- description: Reboot a specific network device
+  endpoint:
+    name: app_server
+    path: /agent/action
+  name: reboot_network_device
+  parameters:
+  - description: Identifier of the network device to reboot.
+    name: device_id
+    required: true
+    type: str
+  - default: false
+    description: Confirmation flag to proceed with reboot.
+    enum:
+    - true
+    - false
+    name: confirmation
+    type: bool
+system_prompt: You are a network assistant that just offers facts; not advice on manufacturers
+  or purchasing decisions.
+tracing:
+  sampling_rate: 0.1
+version: v0.1

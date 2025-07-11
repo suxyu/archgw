@@ -74,9 +74,6 @@ Below is an example to show how to set up a prompt target for the Arch Router:
     :caption: Route Config Example
 
 
-    routing:
-    model: archgw-v1-router-model
-
     listeners:
     egress_traffic:
         address: 0.0.0.0
@@ -85,29 +82,22 @@ Below is an example to show how to set up a prompt target for the Arch Router:
         timeout: 30s
 
     llm_providers:
-    - name: archgw-v1-router-model
-        provider_interface: openai
-        model: katanemo/Arch-Router-1.5B
-        base_url: ...
 
-    - name: gpt-4o-mini
-        provider_interface: openai
-        access_key: $OPENAI_API_KEY
-        model: gpt-4o-mini
-        default: true
+    - model: openai/gpt-4o-mini
+      access_key: $OPENAI_API_KEY
+      default: true
 
-    - name: code_generation
-        provider_interface: openai
-        access_key: $OPENAI_API_KEY
-        model: gpt-4o
-        usage: Generating new code snippets, functions, or boilerplate based on user prompts or requirements
+    - model: openai/gpt-4o
+      access_key: $OPENAI_API_KEY
+      routing_preferences:
+        - name: code understanding
+          description: understand and explain existing code snippets, functions, or libraries
 
-    - name: code_understanding
-        provider_interface: openai
-        access_key: $OPENAI_API_KEY
-        model: gpt-4.1
-        usage: understand and explain existing code snippets, functions, or libraries
-
+    - model: openai/gpt-4.1
+      access_key: $OPENAI_API_KEY
+      routing_preferences:
+        - name: code generation
+          description: generating new code snippets, functions, or boilerplate based on user prompts or requirements
 
 Example Use Cases
 -------------------------
