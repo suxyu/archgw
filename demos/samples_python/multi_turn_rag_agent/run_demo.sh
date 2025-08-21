@@ -8,14 +8,14 @@ start_demo() {
     echo ".env file already exists. Skipping creation."
   else
     # Step 2: Create `.env` file and set OpenAI key
-    if [ -z "$OPENAI_API_KEY" ]; then
-      echo "Error: OPENAI_API_KEY environment variable is not set for the demo."
+    if [ -z "$DASHSCOPE_API_KEY" ]; then
+      echo "Error: DASHSCOPE_API_KEY environment variable is not set for the demo."
       exit 1
     fi
 
     echo "Creating .env file..."
-    echo "OPENAI_API_KEY=$OPENAI_API_KEY" > .env
-    echo ".env file created with OPENAI_API_KEY."
+    echo "DASHSCOPE_API_KEY=$DASHSCOPE_API_KEY" > .env
+    echo ".env file created with DASHSCOPE_API_KEY."
   fi
 
   # Step 3: Start Arch

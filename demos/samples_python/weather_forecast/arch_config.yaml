@@ -17,11 +17,9 @@ overrides:
   prompt_target_intent_matching_threshold: 0.6
 
 llm_providers:
-  - access_key: $GROQ_API_KEY
-    model: groq/llama-3.2-3b-preview
-
-  - access_key: $OPENAI_API_KEY
-    model: openai/gpt-4o
+  - access_key: $DASHSCOPE_API_KEY
+    model: openai/qwen2.5-72b-instruct
+    base_url: https://dashscope.aliyuncs.com
     default: true
 
 system_prompt: |

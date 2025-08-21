@@ -12,9 +12,16 @@ endpoints:
     endpoint: host.docker.internal:18083
     connect_timeout: 0.005s
 
+
+overrides:
+  prompt_target_intent_matching_threshold: 0.6
+  # 指定本地模型路径
+  function_calling_model: "/app/models/Arch-Guard"
+
 llm_providers:
-  - access_key: $OPENAI_API_KEY
-    model: openai/gpt-4o-mini
+  - access_key: $DASHSCOPE_API_KEY
+    base_url: https://dashscope.aliyuncs.com
+    model: openai/qwen2.5-72b-instruct
     default: true
 
 system_prompt: |
